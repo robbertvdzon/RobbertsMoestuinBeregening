@@ -1,39 +1,30 @@
 package com.vdzon.irrigation.components.hardware.api
 
-import com.vdzon.irrigation.components.controller.KlepState
-import com.vdzon.irrigation.components.hardware.impl.DisplayData
+import com.vdzon.irrigation.model.WateringArea
 
 interface Hardware {
     fun start()
-
-    fun klepOpen()
-    fun klepClose()
-
-    fun updateTime(time: String)
-    fun updateIP(ip: String)
-    fun updateKlepState(klepState: KlepState)
-
-    fun encoderUp()
-    fun encoderDown()
-    fun registerEncoderListener(encoderListener: EncoderListener)
-    fun registerSwitchListener(switchListener: SwitchListener)
-    fun registerKlepListener(klepListener: KlepListener)
-    fun getDisplayData(): DisplayData
+    fun setPump(on: Boolean)
+    fun setArea(area: WateringArea)
+    fun setLedState(led: Led, on: Boolean)
+    fun displayLine(lineNr: Int, line: String)
+    fun registerSwitchListener(switchListener: ButtonListener)
 }
 
-interface SwitchListener{
-//    fun switchOn()
-//    fun switchOff()
+interface ButtonListener {
+    fun onButtonClick(button: Button)
 }
 
-interface EncoderListener{
-    fun encoderUp(amount: Int = 1)
-    fun encoderDown(amount: Int = 1)
-    fun startUpdating()
-    fun dicht()
+enum class Button {
+    PLUS_5_MINUTES,
+    MIN_5_MINUTES,
+    MOESTUIN_AREA,
+    GAZON_AREA
 }
 
-interface KlepListener{
-    fun klepOpen()
-    fun klepClosed()
+enum class Led {
+    PUMP_ON,
+    PUMP_OFF,
+    MOESTUIN_AREA,
+    GAZON_AREA
 }

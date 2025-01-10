@@ -7,229 +7,143 @@ import com.pi4j.plugin.gpiod.provider.gpio.digital.GpioDDigitalInputProvider
 import com.pi4j.plugin.gpiod.provider.gpio.digital.GpioDDigitalOutputProvider
 import com.pi4j.util.Console
 import com.vdzon.irrigation.components.log.Log
-import com.vdzon.irrigation.components.controller.KlepState
-import com.vdzon.irrigation.components.hardware.api.EncoderListener
-import com.vdzon.irrigation.components.hardware.api.Hardware
-import com.vdzon.irrigation.components.hardware.api.KlepListener
-import com.vdzon.irrigation.components.hardware.api.SwitchListener
+import com.vdzon.irrigation.components.hardware.api.*
+import com.vdzon.irrigation.model.WateringArea
 import java.util.*
 import kotlin.concurrent.thread
 
 
 class HardwareImpl(val log: Log) : Hardware {
-    /*
-    TODO:
-     met switchListener de controller aanroepen, die moet dan bepalen wat er gedaan moet worden
-     met klepListener ook naar de conroller: die moet de status bijwerken
-
-     Display controller moet iets aparts zijn denk ik
-
-     */
-
-    companion object {
-        private const val PIN_BUTTON_1 = 4
-        private const val PIN_BUTTON_2 = 17
-        private const val PIN_BUTTON_3 = 27
-        private const val PIN_BUTTON_4 = 22
-
-        private const val PIN_LED_1 = 10
-        private const val PIN_LED_2 = 6//9
-        private const val PIN_LED_3 = 11
-        private const val PIN_LED_4 = 13//5
-
-        private const val PIN_AAN_UIT = 19
-        private const val PIN_RICHTING = 26//6 //12
-    }
-
-    private var klepListener: KlepListener? = null
-    private var switchListener: SwitchListener? = null
-    var displayThread: Thread? = null
-
-    private var encoderListener: EncoderListener? = null
-
     lateinit var pi4j: Context
-    lateinit var displayController: DisplayController
+    lateinit var lcd: LcdDisplay
+    lateinit var areaDigitalOutput: DigitalOutput
+    lateinit var pumpDigitalOutput: DigitalOutput
+    lateinit var pumpOnLedDigitalOutput: DigitalOutput
+    lateinit var pumpOffLedDigitalOutput: DigitalOutput
+    lateinit var moestuinLedDigitalOutput: DigitalOutput
+    lateinit var gazonLedDigitalOutput: DigitalOutput
 
-    lateinit var richting: DigitalOutput
-    lateinit var aanUit: DigitalOutput
-    lateinit var led1: DigitalOutput
-    lateinit var led2: DigitalOutput
-    lateinit var led3: DigitalOutput
-    lateinit var led4: DigitalOutput
-    lateinit var switchButton: DigitalInput
+    private var buttonListener: ButtonListener? = null
+    private val requiredDisplayLines: MutableMap<Int, String?> = mutableMapOf()
+    private val currentDisplayLines: MutableMap<Int, String?> = mutableMapOf()
 
-    init {
-        initHardware()
+    override fun setPump(on: Boolean) {
+        when {
+            on -> pumpDigitalOutput.high()
+            !on -> pumpDigitalOutput.low()
+        }
     }
 
-    override fun klepOpen() {
-        aanUit.high()
-        klepListener?.klepOpen()
+    override fun setArea(area: WateringArea) {
+        when (area) {
+            WateringArea.MOESTUIN -> areaDigitalOutput.high()
+            WateringArea.GAZON -> areaDigitalOutput.low()
+        }
     }
 
-    override fun klepClose() {
-        aanUit.low()
-        klepListener?.klepClosed()
+    override fun setLedState(led: Led, on: Boolean) {
+        when {
+            led == Led.PUMP_OFF && on -> pumpOffLedDigitalOutput.high()
+            led == Led.PUMP_OFF && !on -> pumpOffLedDigitalOutput.low()
+
+            led == Led.PUMP_ON && on -> pumpOnLedDigitalOutput.high()
+            led == Led.PUMP_ON && !on -> pumpOnLedDigitalOutput.low()
+
+            led == Led.MOESTUIN_AREA && on -> moestuinLedDigitalOutput.high()
+            led == Led.MOESTUIN_AREA && !on -> moestuinLedDigitalOutput.low()
+
+            led == Led.GAZON_AREA && on -> gazonLedDigitalOutput.high()
+            led == Led.GAZON_AREA && !on -> gazonLedDigitalOutput.low()
+        }
     }
 
-    override fun updateTime(time: String) {
-        displayController.displayData.time = time
+    override fun displayLine(lineNr: Int, line: String) {
+        requiredDisplayLines.put(lineNr, line)
     }
 
-    override fun updateIP(ip: String) {
-        println("IP adress: $ip")
-        displayController.displayData.ip = ip
+    override fun registerSwitchListener(switchListener: ButtonListener) {
+        this.buttonListener = switchListener
     }
-
-    override fun updateKlepState(klepState: KlepState) {
-        displayController.displayData.klepState = klepState
-    }
-
-
-    override fun encoderUp() {
-        encoderListener?.encoderUp()
-    }
-
-    override fun encoderDown() {
-        encoderListener?.encoderDown()
-
-    }
-
-
-    override fun registerEncoderListener(encoderListener: EncoderListener) {
-        this.encoderListener = encoderListener
-    }
-
-    override fun registerSwitchListener(switchListener: SwitchListener) {
-        this.switchListener = switchListener
-    }
-
-    override fun registerKlepListener(klepListener: KlepListener) {
-        this.klepListener = klepListener
-    }
-
-    override fun getDisplayData(): DisplayData = displayController.displayData
 
     override fun start() {
-//        val switchState = switchButton.isHigh
-//        println(switchState)
-//        if (switchButton.isHigh) switchOff() else switchOn()
-    }
-
-
-
-    fun initHardware() {
-//        val piGpio = PiGpio.newNativeInstance()
         pi4j = buildPi4j()
-
         Runtime.getRuntime().addShutdownHook(Thread {
             println("Releasing GPIO resources...")
             pi4j.shutdown()
         })
-        val lcd = LcdDisplay(pi4j, 4, 20, log)
-        displayController = DisplayController(lcd)
-        displayThread = displayController.startThread()
+        lcd = LcdDisplay(pi4j, 4, 20, log)
         printInfo()
 
         val dout: GpioDDigitalOutputProvider = pi4j.dout()
         val din: GpioDDigitalInputProvider = pi4j.din()
 
-        aanUit = dout.create(PIN_AAN_UIT)
-        aanUit.config().shutdownState(DigitalState.LOW)
-        aanUit.addListener(System.out::println)
-        aanUit.low()
+        pumpDigitalOutput = dout.create(PUMP_SOLENOID_PIN)
+        pumpDigitalOutput.config().shutdownState(DigitalState.LOW)
+        pumpDigitalOutput.addListener(System.out::println)
+        pumpDigitalOutput.low()
 
-        richting = dout.create(PIN_RICHTING)
-        richting.config().shutdownState(DigitalState.LOW)
-        richting.addListener(System.out::println)
-        richting.low()
+        areaDigitalOutput = dout.create(AREA_SOLENOID_PIN)
+        areaDigitalOutput.config().shutdownState(DigitalState.LOW)
+        areaDigitalOutput.addListener(System.out::println)
+        areaDigitalOutput.low()
 
-        led1 = dout.create(PIN_LED_1)
-        led1.config().shutdownState(DigitalState.HIGH)
-        led1.addListener(System.out::println)
-        led1.high()
+        pumpOnLedDigitalOutput = dout.create(PUMP_ON_LED_PIN)
+        pumpOnLedDigitalOutput.config().shutdownState(DigitalState.HIGH)
+        pumpOnLedDigitalOutput.addListener(System.out::println)
+        pumpOnLedDigitalOutput.high()
 
-        led2 = dout.create(PIN_LED_2)
-        led2.config().shutdownState(DigitalState.HIGH)
-        led2.addListener(System.out::println)
-        led2.high()
+        pumpOffLedDigitalOutput = dout.create(PUMP_OFF_LED_PIN)
+        pumpOffLedDigitalOutput.config().shutdownState(DigitalState.HIGH)
+        pumpOffLedDigitalOutput.addListener(System.out::println)
+        pumpOffLedDigitalOutput.high()
 
-        led3 = dout.create(PIN_LED_3)
-        led3.config().shutdownState(DigitalState.HIGH)
-        led3.addListener(System.out::println)
-        led3.high()
+        moestuinLedDigitalOutput = dout.create(GROENTETUIN_LED_PIN)
+        moestuinLedDigitalOutput.config().shutdownState(DigitalState.HIGH)
+        moestuinLedDigitalOutput.addListener(System.out::println)
+        moestuinLedDigitalOutput.high()
 
-        led4 = dout.create(PIN_LED_4)
-        led4.config().shutdownState(DigitalState.HIGH)
-        led4.addListener(System.out::println)
-        led4.high()
+        gazonLedDigitalOutput = dout.create(GAZON_LED_PIN)
+        gazonLedDigitalOutput.config().shutdownState(DigitalState.HIGH)
+        gazonLedDigitalOutput.addListener(System.out::println)
+        gazonLedDigitalOutput.high()
 
+        createButton("moestuin_button", MOESTUIN_BUTTON_PIN, din) {
+            buttonListener?.onButtonClick(Button.MOESTUIN_AREA)
+        }
+        createButton("gazon_button", GAZON_BUTTON_PIN, din) {
+            buttonListener?.onButtonClick(Button.GAZON_AREA)
+        }
+        createButton("add_5_button", PLUS_5_MINUTES_BUTTON_PIN, din) {
+            buttonListener?.onButtonClick(Button.PLUS_5_MINUTES)
+        }
+        createButton("min_5_button", MIN_5_MINUTES_BUTTON_PIN, din) {
+            buttonListener?.onButtonClick(Button.MIN_5_MINUTES)
+        }
 
-        val button3 = createButton("button3", PIN_BUTTON_3, din)
-        button3.addListener({ e ->
-            if (e.state() === DigitalState.LOW) {
-                println("Button3")
-                led3.high()
-                led2.low()
-                richting.high()
-            }
-        })
-
-        val button4 = createButton("button4", PIN_BUTTON_4, din)
-        button4.addListener({ e ->
-            if (e.state() === DigitalState.LOW) {
-                println("Button4")
-                led2.high()
-                led3.low()
-                richting.low()
-            }
-        })
-
-
-
-        switchButton = createButton("display", PIN_BUTTON_2, din)
-        switchButton.addListener({ e ->
-            if (e.state() === DigitalState.LOW) {
-                println("Button1")
-                led1.high()
-                led4.low()
-                (0..4).forEach { encoderDown() } // 5 down
-            }
-        })
-
-
-        val stopButton = createButton("stopbutton", PIN_BUTTON_1, din)
-        stopButton.addListener({ e ->
-            if (e.state() === DigitalState.LOW) {
-                println("Button2")
-                led1.low()
-                led4.high()
-                (0..4).forEach { encoderUp() } // 5 down
-            }
-        })
-
-        updateTime("")
-
+        startDisplayThread()
     }
 
     private fun createButton(
         id: String,
         pinButton: Int,
-        din: GpioDDigitalInputProvider
+        din: GpioDDigitalInputProvider,
+        function: (DigitalStateChangeEvent<Digital<*, *, *>>) -> Unit
     ): DigitalInput {
         val properties = Properties()
         properties["id"] = id
         properties["address"] = pinButton
         properties["pull"] = "DOWN"
         properties["name"] = id.uppercase()
-        var config = DigitalInput.newConfigBuilder(pi4j)
-            .load(properties)
-            .build()
-        return din.create(config);
+        val button = din.create(
+            DigitalInput.newConfigBuilder(pi4j)
+                .load(properties)
+                .build()
+        )
+        button.addListener(function)
+        return button
     }
 
     private fun buildPi4j(): Context = Pi4J.newAutoContext()
-
 
     private fun printInfo() {
         val console = Console()
@@ -240,102 +154,56 @@ class HardwareImpl(val log: Log) : Hardware {
         PrintInfo.printRegistry(console, pi4j)
     }
 
-
-}
-
-data class DisplayData(
-    var manual: Boolean = false,
-    var ip: String = "",
-    var klepState: KlepState = KlepState.OPEN,
-    var time: String = "",
-    var plannedTime: String = ""
-
-)
-
-class DisplayController(val lcd: LcdDisplay) {
-
-    val displayData = DisplayData()
-
-    fun startThread() = thread(start = true) {
+    fun startDisplayThread() = thread(start = true) {
         displayThread()
     }
-
 
     fun displayThread() {
         lcd.setDisplayBacklight(true)
         lcd.clearDisplay()
-        updateDisplay()
         while (true) {
-            sleep()
             try {
                 updateDisplay()
             } catch (e: Exception) {
                 e.printStackTrace()
             }
+            sleep()
         }
     }
 
-    var oldLine1 = ""
-    var oldLine2 = ""
-    var oldLine3 = ""
-    var oldLine4 = ""
-
-    var count = 0L
-
     private fun updateDisplay() {
-        val currentSeconds = System.currentTimeMillis() / 1000
-        val isEventSeconds = currentSeconds.mod(2) == 0
-        val state = if (isEventSeconds)
-            "-"
-        else
-            "X"
-
-
-//        println("update display start from ${Thread.currentThread().hashCode()}")
-
-        val line1 = "${displayData.ip}"
-        val line2 = "${displayData.klepState.text}"
-        val line3 = "$state"
-        val line4 = if (displayData.time.isNotEmpty()) {
-            "Timer: ${displayData.time}"
-        } else if (displayData.plannedTime.isNotEmpty()) {
-            "Planned: ${displayData.plannedTime}"
-        } else {
-            "Geen planning"
-        }
-
-        if (oldLine1 != line1) {
-            lcd.displayText(line1, 1)
-            oldLine1 = line1
-        }
-        if (oldLine2 != line2) {
-            lcd.displayText(line2, 2)
-            oldLine2 = line2
-        }
-        if (oldLine3 != line3) {
-            lcd.displayText(line3, 3)
-            oldLine3 = line3
-        }
-        if (oldLine4 != line4) {
-            count++
-            if (count % 30 == 0L) {
-                println("update display $line4")
+        (1..4).forEach { lineNr ->
+            val currentLine = currentDisplayLines[lineNr]
+            val requiredLine = requiredDisplayLines[lineNr]
+            if (currentLine != requiredLine) {
+                val line = requiredLine ?: ""
+                lcd.displayText(line, lineNr)
+                currentDisplayLines[lineNr] = requiredLine
             }
-            lcd.displayText(line4, 4)
-            if (count % 30 == 0L) {
-                println("updated display $line4")
-            }
-            oldLine4 = line4
         }
-
-//        println("update display end from ${Thread.currentThread().hashCode()}")
     }
 
     private fun sleep() {
         try {
-            Thread.sleep(10)// met
+            Thread.sleep(10)
         } catch (e: InterruptedException) {
         }
     }
 
+    companion object {
+        private const val MIN_5_MINUTES_BUTTON_PIN = 4
+        private const val PLUS_5_MINUTES_BUTTON_PIN = 17
+        private const val MOESTUIN_BUTTON_PIN = 27
+        private const val GAZON_BUTTON_PIN = 22
+
+        private const val PUMP_ON_LED_PIN = 10
+        private const val PUMP_OFF_LED_PIN = 6
+        private const val GROENTETUIN_LED_PIN = 11
+        private const val GAZON_LED_PIN = 13
+
+        private const val PUMP_SOLENOID_PIN = 19
+        private const val AREA_SOLENOID_PIN = 26
+    }
+
 }
+

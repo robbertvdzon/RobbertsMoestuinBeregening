@@ -15,11 +15,11 @@ class BewateringCommandProcessor(val controller: Controller) : CommandProcessor 
         val count = command.toIntOrNull()
         if (count!=null && count>0){
             println("open $count minuten meer")
-            controller.encoderUp(count)
+//            controller.encoderUp(count)
         }
         if (count!=null && count<0){
             println("open $count minuten minder")
-            controller.encoderDown(count*-1)
+//            controller.encoderDown(count*-1)
         }
         if (command == "open") {
             controller.openKlep()

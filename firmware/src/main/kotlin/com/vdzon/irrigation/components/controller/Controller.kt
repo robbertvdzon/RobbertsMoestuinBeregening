@@ -1,11 +1,9 @@
 package com.vdzon.irrigation.components.controller
 
 import com.vdzon.irrigation.common.FirebaseProducer
-import com.vdzon.irrigation.components.hardware.api.EncoderListener
+import com.vdzon.irrigation.components.hardware.api.Button
 import com.vdzon.irrigation.components.hardware.api.Hardware
-import com.vdzon.irrigation.components.hardware.api.KlepListener
-import com.vdzon.irrigation.components.hardware.api.SwitchListener
-import com.vdzon.irrigation.components.hardware.impl.DisplayData
+import com.vdzon.irrigation.components.hardware.api.ButtonListener
 import java.time.LocalDateTime
 import kotlin.concurrent.thread
 import java.time.Duration
@@ -14,81 +12,85 @@ class Controller(
     val hardware: Hardware,
     val firebaseProducer: FirebaseProducer
 
-) : EncoderListener, SwitchListener, KlepListener {
-    private var manual: Boolean = false
-    private var klepState = KlepState.OPEN
+) : ButtonListener {
     private var closeTime: LocalDateTime = LocalDateTime.now().minusDays(1)// in the past
     private var updateStatusUntilTime: LocalDateTime = LocalDateTime.now()
 
 
     init {
-        hardware.registerEncoderListener(this)
         hardware.registerSwitchListener(this)
-        hardware.registerKlepListener(this)
         thread(start = true) {
             updateStatusThread()
         }
+    }
+
+    override fun onButtonClick(button: Button){
+        when(button){
+            Button.MIN_5_MINUTES -> println("min 5")
+            Button.PLUS_5_MINUTES -> println("plus 5")
+            Button.MOESTUIN_AREA -> println("moestuin area")
+            Button.GAZON_AREA -> println("gazon area")
+        }
 
     }
-    fun getDisplayData(): DisplayData {
-        return hardware.getDisplayData()
-    }
+
+//    fun getDisplayData(): DisplayData {
+//        return hardware.getDisplayData()
+//    }
 
     fun setIp(ip: String) {
-        hardware.updateIP(ip)
+//        hardware.updateIP(ip)
     }
 
     fun openKlep() {
-        hardware.klepOpen()
+//        hardware.klepOpen()
     }
 
     fun closeKlep() {
-        hardware.klepClose()
+//        hardware.klepClose()
     }
 
-    override fun klepOpen() {
-        klepState= KlepState.OPEN
-        hardware.updateKlepState(KlepState.OPEN)
-        firebaseProducer.setStatus("Open")
-    }
+//    override fun klepOpen() {
+//        klepState= KlepState.OPEN
+//        hardware.updateKlepState(KlepState.OPEN)
+//        firebaseProducer.setStatus("Open")
+//    }
+//
+//    override fun klepClosed() {
+//        klepState= KlepState.CLOSED
+//        hardware.updateKlepState(KlepState.CLOSED)
+//        firebaseProducer.setStatus("Closed")
+//
+//    }
 
-    override fun klepClosed() {
-        klepState= KlepState.CLOSED
-        hardware.updateKlepState(KlepState.CLOSED)
-        firebaseProducer.setStatus("Closed")
-
-    }
-
-    override fun startUpdating(){
+    fun startUpdating(){
         val currentTime = LocalDateTime.now()
         val nextHalfHour: LocalDateTime = currentTime.plusMinutes(2)// laten staan op 2 minuten
         updateStatusUntilTime = nextHalfHour
         println("Update the time status until ${updateStatusUntilTime}")
-
-
     }
-
-    override fun encoderUp(amount: Int) {
-        if (closeTime.isBefore(LocalDateTime.now())) {
-            closeTime = LocalDateTime.now().plusMinutes(amount.toLong())
-        } else {
-            closeTime = closeTime.plusMinutes(amount.toLong())
-        }
-        val time = closeTime.toString().substring(11, 16)
-        updateStatus()
-    }
-
-    override fun dicht() {
-        closeTime = LocalDateTime.now()
-        val time = closeTime.toString().substring(11, 16)
-        updateStatus()
-    }
-
-    override fun encoderDown(amount: Int) {
-        closeTime = closeTime.minusMinutes(amount.toLong())
-        val time = closeTime.toString().substring(11, 16)
-        updateStatus()
-    }
+//
+//    override fun encoderUp(amount: Int) {
+//        if (closeTime.isBefore(LocalDateTime.now())) {
+//            closeTime = LocalDateTime.now().plusMinutes(amount.toLong())
+//        } else {
+//            closeTime = closeTime.plusMinutes(amount.toLong())
+//        }
+//        val time = closeTime.toString().substring(11, 16)
+//        updateStatus()
+//    }
+//
+//    override fun dicht() {
+//        closeTime = LocalDateTime.now()
+//        val time = closeTime.toString().substring(11, 16)
+//        updateStatus()
+//    }
+//
+//    override fun encoderDown(amount: Int) {
+//        closeTime = closeTime.minusMinutes(amount.toLong())
+//        val time = closeTime.toString().substring(11, 16)
+//        updateStatus()
+//    }
 
 
     fun updateStatusThread() {
@@ -107,10 +109,10 @@ class Controller(
         val closeTimeInFuture = secondsRemainingUntilClose>0
         val closeTimeInPast = !closeTimeInFuture
         if (closeTimeInPast) {
-            hardware.klepClose()
+            hardware.setPump(false)
         }
         else{
-            hardware.klepOpen()
+            hardware.setPump(true)
         }
     }
 
@@ -130,10 +132,10 @@ class Controller(
             val minutes = duration.toMinutesPart()
             val seconds = duration.toSecondsPart()
             val formattedDuration = String.format("%02d:%02d:%02d", hours, minutes, seconds)
-            hardware.updateTime("$formattedDuration")
+            hardware.displayLine(3,"$formattedDuration")
             firebaseProducer.setTime(formattedDuration)
         }else{
-            hardware.updateTime("")
+            hardware.displayLine(3,"")
             firebaseProducer.setTime("00:00")
         }
     }

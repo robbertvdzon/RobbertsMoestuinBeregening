@@ -1,20 +1,12 @@
 package com.vdzon.irrigation.components.hardware.mockimpl
 
-import com.vdzon.irrigation.components.controller.KlepState
-import com.vdzon.irrigation.components.hardware.api.EncoderListener
-import com.vdzon.irrigation.components.hardware.api.Hardware
-import com.vdzon.irrigation.components.hardware.api.KlepListener
-import com.vdzon.irrigation.components.hardware.api.SwitchListener
-import com.vdzon.irrigation.components.hardware.impl.DisplayData
+import com.vdzon.irrigation.components.hardware.api.*
+import com.vdzon.irrigation.model.WateringArea
 import org.jline.terminal.TerminalBuilder
-import java.util.*
 
 
 class HardwareMock : Hardware {
-    private var encoderListener: EncoderListener? = null
-    private var switchListener: SwitchListener? = null
-    private var klepListener: KlepListener? = null
-    private val displayData =  DisplayData()
+    private var buttonListener: ButtonListener? = null
 
     override fun start(){
         val terminal = TerminalBuilder.terminal()
@@ -38,56 +30,43 @@ class HardwareMock : Hardware {
         }
     }
 
-
-    override fun klepOpen() {
-        displayData.klepState = KlepState.OPEN
-        klepListener?.klepOpen()
-        println("klep open")
+    override fun setPump(on: Boolean) {
+        when {
+            on -> println("PUMP ON")
+            !on -> println("PUMP OFF")
+        }
     }
 
-    override fun klepClose() {
-        displayData.klepState = KlepState.CLOSED
-        klepListener?.klepClosed()
-//        println("klep close")
+    override fun setArea(area: WateringArea) {
+        when (area) {
+            WateringArea.MOESTUIN -> println("SET AREA TO MOESTUIN")
+            WateringArea.GAZON -> println("SET AREA TO GAZON")
+        }
     }
 
-    override fun updateTime(time: String) {
-        displayData.time = time
+    override fun setLedState(led: Led, on: Boolean) {
+        when {
+            led == Led.PUMP_OFF && on -> println("LED 'PUMP_OFF' : on")
+            led == Led.PUMP_OFF && !on -> println("LED 'PUMP_OFF' : off")
+
+            led == Led.PUMP_ON && on -> println("LED 'PUMP_ON' : on")
+            led == Led.PUMP_ON && !on -> println("LED 'PUMP_ON' : off")
+
+            led == Led.MOESTUIN_AREA && on -> println("LED 'MOESTUIN' : on")
+            led == Led.MOESTUIN_AREA && !on -> println("LED 'MOESTUIN' : off")
+
+            led == Led.GAZON_AREA && on -> println("LED 'GAZON' : on")
+            led == Led.GAZON_AREA && !on -> println("LED 'GAZON' : off")
+        }
     }
 
-    override fun updateIP(ip: String) {
-        displayData.ip = ip
-        println("ip: $ip")
-    }
-    override fun updateKlepState(klepState: KlepState){
-        displayData.klepState = klepState
-//        println("klepState: $klepState")
+    override fun displayLine(lineNr: Int, line: String){
+        println("DISPLAY, LINE $lineNr : $line")
     }
 
-
-    override fun encoderUp(){
-        encoderListener?.encoderUp()
+    override fun registerSwitchListener(buttonListener: ButtonListener){
+        this.buttonListener = buttonListener
     }
-    override fun encoderDown(){
-        encoderListener?.encoderDown()
-    }
-//    override fun switchOn(){
-//        switchListener?.switchOn()
-//    }
-//    override fun switchOff(){
-//        switchListener?.switchOff()
-//    }
-    override fun registerEncoderListener(encoderListener: EncoderListener){
-        this.encoderListener = encoderListener
-    }
-    override fun registerSwitchListener(switchListener: SwitchListener){
-        this.switchListener = switchListener
-    }
-    override fun registerKlepListener(klepListener: KlepListener){
-        this.klepListener = klepListener
-    }
-    override fun getDisplayData(): DisplayData = displayData
-
 
 
 
