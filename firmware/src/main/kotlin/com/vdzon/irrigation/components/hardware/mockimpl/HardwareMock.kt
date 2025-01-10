@@ -1,6 +1,11 @@
-package com.vdzon.irrigation.components.hardware
+package com.vdzon.irrigation.components.hardware.mockimpl
 
 import com.vdzon.irrigation.components.controller.KlepState
+import com.vdzon.irrigation.components.hardware.impl.DisplayData
+import com.vdzon.irrigation.components.hardware.api.EncoderListener
+import com.vdzon.irrigation.components.hardware.api.Hardware
+import com.vdzon.irrigation.components.hardware.api.KlepListener
+import com.vdzon.irrigation.components.hardware.api.SwitchListener
 
 
 class HardwareMock : Hardware {

@@ -1,4 +1,4 @@
-package com.vdzon.irrigation.components.hardware
+package com.vdzon.irrigation.components.hardware.impl
 
 import com.pi4j.Pi4J
 import com.pi4j.context.Context
@@ -6,8 +6,12 @@ import com.pi4j.io.gpio.digital.*
 import com.pi4j.plugin.gpiod.provider.gpio.digital.GpioDDigitalInputProvider
 import com.pi4j.plugin.gpiod.provider.gpio.digital.GpioDDigitalOutputProvider
 import com.pi4j.util.Console
-import com.vdzon.irrigation.Log
+import com.vdzon.irrigation.components.log.Log
 import com.vdzon.irrigation.components.controller.KlepState
+import com.vdzon.irrigation.components.hardware.api.EncoderListener
+import com.vdzon.irrigation.components.hardware.api.Hardware
+import com.vdzon.irrigation.components.hardware.api.KlepListener
+import com.vdzon.irrigation.components.hardware.api.SwitchListener
 import java.util.*
 import kotlin.concurrent.thread
 

@@ -1,6 +1,7 @@
-package com.vdzon.irrigation.components.hardware
+package com.vdzon.irrigation.components.hardware.api
 
 import com.vdzon.irrigation.components.controller.KlepState
+import com.vdzon.irrigation.components.hardware.impl.DisplayData
 
 interface Hardware {
     fun start()

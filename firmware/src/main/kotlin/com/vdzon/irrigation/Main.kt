@@ -5,8 +5,9 @@ import com.vdzon.irrigation.common.FirebaseListener
 import com.vdzon.irrigation.common.FirebaseProducer
 import com.vdzon.irrigation.components.controller.BewateringCommandProcessor
 import com.vdzon.irrigation.components.controller.Controller
-import com.vdzon.irrigation.components.hardware.HardwareImpl
-import com.vdzon.irrigation.components.hardware.HardwareMock
+import com.vdzon.irrigation.components.hardware.impl.HardwareImpl
+import com.vdzon.irrigation.components.hardware.mockimpl.HardwareMock
+import com.vdzon.irrigation.components.log.Log
 import java.net.NetworkInterface
 import kotlin.concurrent.thread
 

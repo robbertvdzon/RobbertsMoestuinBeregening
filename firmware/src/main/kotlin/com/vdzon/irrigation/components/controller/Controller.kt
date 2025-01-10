@@ -1,7 +1,11 @@
 package com.vdzon.irrigation.components.controller
 
 import com.vdzon.irrigation.common.FirebaseProducer
-import com.vdzon.irrigation.components.hardware.*
+import com.vdzon.irrigation.components.hardware.api.EncoderListener
+import com.vdzon.irrigation.components.hardware.api.Hardware
+import com.vdzon.irrigation.components.hardware.api.KlepListener
+import com.vdzon.irrigation.components.hardware.api.SwitchListener
+import com.vdzon.irrigation.components.hardware.impl.DisplayData
 import java.time.LocalDateTime
 import kotlin.concurrent.thread
 import java.time.Duration
