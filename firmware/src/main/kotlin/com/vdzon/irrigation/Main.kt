@@ -43,11 +43,10 @@ object Main {
         val commandProcessor = BewateringCommandProcessor(controller)
         val firebaseListener = FirebaseListener(COLLECTION, COMMANDS_DOCUMENT, commandProcessor)
 
-        hardware.start()
-        println("NIEUWE VERSIE MET FIREBASE!!")
         // instantiate the Firestore database and start listening for commands
         firebaseListener.processCommands(dbFirestore)
         updateNetworkIp(controller)
+        hardware.start()
     }
 
     fun updateNetworkIp(controller: Controller) {

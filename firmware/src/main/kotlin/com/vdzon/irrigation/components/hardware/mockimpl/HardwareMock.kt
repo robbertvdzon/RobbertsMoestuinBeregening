@@ -1,11 +1,13 @@
 package com.vdzon.irrigation.components.hardware.mockimpl
 
 import com.vdzon.irrigation.components.controller.KlepState
-import com.vdzon.irrigation.components.hardware.impl.DisplayData
 import com.vdzon.irrigation.components.hardware.api.EncoderListener
 import com.vdzon.irrigation.components.hardware.api.Hardware
 import com.vdzon.irrigation.components.hardware.api.KlepListener
 import com.vdzon.irrigation.components.hardware.api.SwitchListener
+import com.vdzon.irrigation.components.hardware.impl.DisplayData
+import org.jline.terminal.TerminalBuilder
+import java.util.*
 
 
 class HardwareMock : Hardware {
@@ -15,8 +17,27 @@ class HardwareMock : Hardware {
     private val displayData =  DisplayData()
 
     override fun start(){
-
+        val terminal = TerminalBuilder.terminal()
+        println("q:-5  w:+5     e:moesttuin  r:gazon")
+        while (true) {
+            val key = terminal.reader().read().toChar()
+            when(key){
+                'q' -> {
+                    println("-5")
+                }
+                'w' -> {
+                    println("+5")
+                }
+                'e' -> {
+                    println("moestuin")
+                }
+                'r' -> {
+                    println("gazon")
+                }
+            }
+        }
     }
+
 
     override fun klepOpen() {
         displayData.klepState = KlepState.OPEN
@@ -27,7 +48,7 @@ class HardwareMock : Hardware {
     override fun klepClose() {
         displayData.klepState = KlepState.CLOSED
         klepListener?.klepClosed()
-        println("klep close")
+//        println("klep close")
     }
 
     override fun updateTime(time: String) {
@@ -40,7 +61,7 @@ class HardwareMock : Hardware {
     }
     override fun updateKlepState(klepState: KlepState){
         displayData.klepState = klepState
-        println("klepState: $klepState")
+//        println("klepState: $klepState")
     }
 
 

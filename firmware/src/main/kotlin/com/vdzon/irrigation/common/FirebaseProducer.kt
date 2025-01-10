@@ -18,29 +18,29 @@ Waarom in common data? dit is niet echt common!
         if (time==lastData){
             return
         }
-        if (nrUpdates % 30 == 0){
-            println("Start Write to firebase: $time")
-        }
+//        if (nrUpdates % 30 == 0){
+//            println("Start Write to firebase: $time")
+//        }
 //        println("Write to firebase: $time")
-        val documentRef = dbFirestore?.collection(collection)?.document(document)
-        documentRef?.set(mapOf("klok" to time), SetOptions.merge())
-        nrUpdates++
-        documentRef?.set(mapOf("updatecount" to nrUpdates), SetOptions.merge())
-        if (nrUpdates % 30 == 0){
-            println("written to firebase: $time")
-        }
-        lastData=time
+//        val documentRef = dbFirestore?.collection(collection)?.document(document)
+//        documentRef?.set(mapOf("klok" to time), SetOptions.merge())
+//        nrUpdates++
+//        documentRef?.set(mapOf("updatecount" to nrUpdates), SetOptions.merge())
+//        if (nrUpdates % 30 == 0){
+//            println("written to firebase: $time")
+//        }
+//        lastData=time
     }
 
     fun setStatus(status: String) {
         if (status==lastStatus){
             return
         }
-        println("Write to firebase: $status")
-        val documentRef = dbFirestore?.collection(collection)?.document(document)
-        documentRef?.set(mapOf("status" to status), SetOptions.merge())
-        nrUpdates++
-        documentRef?.set(mapOf("updatecount" to nrUpdates), SetOptions.merge())
+//        println("Write to firebase: $status")
+//        val documentRef = dbFirestore?.collection(collection)?.document(document)
+//        documentRef?.set(mapOf("status" to status), SetOptions.merge())
+//        nrUpdates++
+//        documentRef?.set(mapOf("updatecount" to nrUpdates), SetOptions.merge())
     }
 
 
