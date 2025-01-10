@@ -1,4 +1,4 @@
-package com.vdzon.java.common
+package com.vdzon.irrigation.common
 
 interface CommandProcessor {
     fun process(command: String)

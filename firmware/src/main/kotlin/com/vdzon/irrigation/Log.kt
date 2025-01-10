@@ -1,4 +1,4 @@
-package com.vdzon.java
+package com.vdzon.irrigation
 
 import java.util.logging.Logger
 

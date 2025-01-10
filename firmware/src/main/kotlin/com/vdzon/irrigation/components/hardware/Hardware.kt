@@ -1,6 +1,6 @@
-package com.vdzon.java.components.hardware
+package com.vdzon.irrigation.components.hardware
 
-import com.vdzon.java.components.controller.KlepState
+import com.vdzon.irrigation.components.controller.KlepState
 
 interface Hardware {
     fun start()

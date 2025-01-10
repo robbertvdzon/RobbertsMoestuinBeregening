@@ -1,4 +1,4 @@
-package com.vdzon.java.model
+package com.vdzon.irrigation.model
 
 enum class PumpStatus{
     OPEN, CLOSE

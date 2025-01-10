@@ -1,9 +1,9 @@
-package com.vdzon.java.components.hardware
+package com.vdzon.irrigation.components.hardware
 
 import com.pi4j.context.Context
 import com.pi4j.io.i2c.I2C
 import com.pi4j.io.i2c.I2CConfig
-import com.vdzon.java.Log
+import com.vdzon.irrigation.Log
 import kotlin.experimental.inv
 
 /**

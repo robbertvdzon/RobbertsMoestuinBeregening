@@ -1,4 +1,4 @@
-package com.vdzon.java.common
+package com.vdzon.irrigation.common
 
 import com.google.cloud.firestore.Firestore
 import com.google.cloud.firestore.SetOptions

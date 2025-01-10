@@ -1,4 +1,4 @@
-package com.vdzon.java.components.hardware
+package com.vdzon.irrigation.components.hardware
 
 import com.pi4j.context.Context
 import com.pi4j.platform.Platform

@@ -1,7 +1,6 @@
-package com.vdzon.java.components.hardware
+package com.vdzon.irrigation.components.hardware
 
-import com.vdzon.java.components.controller.KlepState
-import com.vdzon.java.components.hardware.*
+import com.vdzon.irrigation.components.controller.KlepState
 
 
 class HardwareMock : Hardware {

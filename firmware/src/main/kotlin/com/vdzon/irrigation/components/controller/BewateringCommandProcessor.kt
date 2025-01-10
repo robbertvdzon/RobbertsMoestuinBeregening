@@ -1,6 +1,6 @@
-package com.vdzon.java.components.controller
+package com.vdzon.irrigation.components.controller
 
-import com.vdzon.java.common.CommandProcessor
+import com.vdzon.irrigation.common.CommandProcessor
 
 
 class BewateringCommandProcessor(val controller: Controller) : CommandProcessor {

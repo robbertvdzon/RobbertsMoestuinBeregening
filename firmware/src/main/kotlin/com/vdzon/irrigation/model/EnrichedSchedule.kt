@@ -1,4 +1,4 @@
-package com.vdzon.java.model
+package com.vdzon.irrigation.model
 
 
 data class EnrichedSchedule (

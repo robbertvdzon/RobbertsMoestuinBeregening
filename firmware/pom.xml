@@ -2,37 +2,21 @@
     <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
         <modelVersion>4.0.0</modelVersion>
         <groupId>vdzon.com</groupId>
-        <artifactId>schaakrobot</artifactId>
+        <artifactId>irrigation</artifactId>
         <version>0.0.1</version>
         <packaging>jar</packaging>
-        <name>schaakrob</name>
+        <name>irrigation</name>
 
         <properties>
             <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
             <kotlin.version>2.0.21</kotlin.version>
             <kotlin.code.style>official</kotlin.code.style>
             <logback_version>1.2.1</logback_version>
-            <version_postgresql>42.2.12</version_postgresql>
             <slf4j.version>1.7.32</slf4j.version>
             <pi4j.version>2.7.0</pi4j.version>
         </properties>
 
         <dependencies>
-<!--            <dependency>-->
-<!--                <groupId>io.grpc</groupId>-->
-<!--                <artifactId>grpc-netty-shaded</artifactId>-->
-<!--                <version>1.68.0</version> &lt;!&ndash; Controleer of er een recentere versie beschikbaar is &ndash;&gt;-->
-<!--            </dependency>-->
-<!--            <dependency>-->
-<!--                <groupId>io.grpc</groupId>-->
-<!--                <artifactId>grpc-protobuf</artifactId>-->
-<!--                <version>1.68.0</version>-->
-<!--            </dependency>-->
-<!--            <dependency>-->
-<!--                <groupId>io.grpc</groupId>-->
-<!--                <artifactId>grpc-stub</artifactId>-->
-<!--                <version>1.68.0</version>-->
-<!--            </dependency>-->
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
@@ -53,11 +37,6 @@
                 <artifactId>pi4j-plugin-raspberrypi</artifactId>
                 <version>${pi4j.version}</version>
             </dependency>
-<!--            <dependency>-->
-<!--                <groupId>com.pi4j</groupId>-->
-<!--                <artifactId>pi4j-plugin-pigpio</artifactId>-->
-<!--                <version>${pi4j.version}</version>-->
-<!--            </dependency>-->
             <dependency>
                 <groupId>com.pi4j</groupId>
                 <artifactId>pi4j-core</artifactId>
@@ -68,11 +47,6 @@
                 <artifactId>pi4j-plugin-raspberrypi</artifactId>
                 <version>${pi4j.version}</version>
             </dependency>
-<!--            <dependency>-->
-<!--                <groupId>com.pi4j</groupId>-->
-<!--                <artifactId>pi4j-plugin-pigpio</artifactId>-->
-<!--                <version>${pi4j.version}</version>-->
-<!--            </dependency>-->
             <dependency>
                 <groupId>com.pi4j</groupId>
                 <artifactId>pi4j-plugin-gpiod</artifactId>
@@ -83,39 +57,11 @@
                 <artifactId>pi4j-plugin-linuxfs</artifactId>
                 <version>${pi4j.version}</version>
             </dependency>
-
-
-<!--            <dependency>-->
-<!--                <groupId>junit</groupId>-->
-<!--                <artifactId>junit</artifactId>-->
-<!--                <version>4.12</version>-->
-<!--                <scope>test</scope>-->
-<!--            </dependency>-->
-<!--            <dependency>-->
-<!--                <groupId>org.mockito</groupId>-->
-<!--                <artifactId>mockito-core</artifactId>-->
-<!--                <version>3.1.0</version>-->
-<!--                <scope>test</scope>-->
-<!--            </dependency>-->
-<!--            <dependency>-->
-<!--                <groupId>org.assertj</groupId>-->
-<!--                <artifactId>assertj-core</artifactId>-->
-<!--                <version>3.12.2</version>-->
-<!--                <scope>test</scope>-->
-<!--            </dependency>-->
-
             <dependency>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-stdlib</artifactId>
                 <version>${kotlin.version}</version> <!-- Of een recentere versie -->
             </dependency>
-
-<!--            <dependency>-->
-<!--                <groupId>org.jetbrains.kotlinx</groupId>-->
-<!--                <artifactId>kotlinx-serialization-json-jvm</artifactId>-->
-<!--                <version>1.3.1</version>-->
-<!--            </dependency>-->
-
             <dependency>
                 <groupId>com.google.firebase</groupId>
                 <artifactId>firebase-admin</artifactId>
@@ -168,9 +114,6 @@
                         </dependency>
                     </dependencies>
                 </plugin>
-
-
-
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
@@ -178,13 +121,11 @@
                     <configuration>
                         <archive>
                             <manifest>
-                                <mainClass>com.vdzon.java.Main</mainClass>
+                                <mainClass>com.vdzon.irrigation.Main</mainClass>
                             </manifest>
                         </archive>
                     </configuration>
                 </plugin>
-
-
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
@@ -200,7 +141,7 @@
                                 <transformers>
                                     <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                                     <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                        <mainClass>com.vdzon.java.Main</mainClass>
+                                        <mainClass>com.vdzon.irrigation.Main</mainClass>
                                     </transformer>
                                 </transformers>
                                 <!-- Verwijder ondertekende bestanden -->
@@ -226,11 +167,8 @@
                         <target>17</target>
                     </configuration>
                 </plugin>
-
-
             </plugins>
         </build>
-
 
     </project>
 

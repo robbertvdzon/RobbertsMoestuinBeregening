@@ -1,12 +1,12 @@
-package com.vdzon.java
+package com.vdzon.irrigation
 
-import com.vdzon.java.common.FirebaseConfig
-import com.vdzon.java.common.FirebaseListener
-import com.vdzon.java.common.FirebaseProducer
-import com.vdzon.java.components.controller.BewateringCommandProcessor
-import com.vdzon.java.components.controller.Controller
-import com.vdzon.java.components.hardware.HardwareImpl
-import com.vdzon.java.components.hardware.HardwareMock
+import com.vdzon.irrigation.common.FirebaseConfig
+import com.vdzon.irrigation.common.FirebaseListener
+import com.vdzon.irrigation.common.FirebaseProducer
+import com.vdzon.irrigation.components.controller.BewateringCommandProcessor
+import com.vdzon.irrigation.components.controller.Controller
+import com.vdzon.irrigation.components.hardware.HardwareImpl
+import com.vdzon.irrigation.components.hardware.HardwareMock
 import java.net.NetworkInterface
 import kotlin.concurrent.thread
 

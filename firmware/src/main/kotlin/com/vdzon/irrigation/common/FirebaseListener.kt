@@ -1,10 +1,9 @@
-package com.vdzon.java.common
+package com.vdzon.irrigation.common
 
 import com.google.cloud.firestore.DocumentReference
 import com.google.cloud.firestore.DocumentSnapshot
 import com.google.cloud.firestore.FieldValue
 import com.google.cloud.firestore.Firestore
-import com.vdzon.java.common.CommandProcessor
 import java.util.concurrent.Executors
 
 class FirebaseListener(

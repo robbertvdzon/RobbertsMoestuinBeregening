@@ -1,7 +1,7 @@
-package com.vdzon.java.components.controller
+package com.vdzon.irrigation.components.controller
 
-import com.vdzon.java.common.FirebaseProducer
-import com.vdzon.java.components.hardware.*
+import com.vdzon.irrigation.common.FirebaseProducer
+import com.vdzon.irrigation.components.hardware.*
 import java.time.LocalDateTime
 import kotlin.concurrent.thread
 import java.time.Duration
