@@ -1,5 +1,5 @@
 package com.vdzon.irrigation.model
 
-enum class WateringArea {
+enum class IrrigationArea {
     MOESTUIN, GAZON
 }

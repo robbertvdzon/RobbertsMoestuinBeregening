@@ -8,7 +8,7 @@ import com.pi4j.plugin.gpiod.provider.gpio.digital.GpioDDigitalOutputProvider
 import com.pi4j.util.Console
 import com.vdzon.irrigation.components.log.Log
 import com.vdzon.irrigation.components.hardware.api.*
-import com.vdzon.irrigation.model.WateringArea
+import com.vdzon.irrigation.model.IrrigationArea
 import java.util.*
 import kotlin.concurrent.thread
 
@@ -29,31 +29,31 @@ class HardwareImpl(val log: Log) : Hardware {
 
     override fun setPump(on: Boolean) {
         when {
-            on -> pumpDigitalOutput.high()
-            !on -> pumpDigitalOutput.low()
+            on -> if (!pumpDigitalOutput.isHigh) pumpDigitalOutput.high()
+            !on -> if (!pumpDigitalOutput.isLow) pumpDigitalOutput.low()
         }
     }
 
-    override fun setArea(area: WateringArea) {
+    override fun setArea(area: IrrigationArea) {
         when (area) {
-            WateringArea.MOESTUIN -> areaDigitalOutput.high()
-            WateringArea.GAZON -> areaDigitalOutput.low()
+            IrrigationArea.MOESTUIN -> if (!areaDigitalOutput.isHigh) areaDigitalOutput.high()
+            IrrigationArea.GAZON -> if (!areaDigitalOutput.isLow) areaDigitalOutput.low()
         }
     }
 
     override fun setLedState(led: Led, on: Boolean) {
         when {
-            led == Led.PUMP_OFF && on -> pumpOffLedDigitalOutput.high()
-            led == Led.PUMP_OFF && !on -> pumpOffLedDigitalOutput.low()
+            led == Led.PUMP_OFF && on -> if (!pumpOffLedDigitalOutput.isHigh) pumpOffLedDigitalOutput.high()
+            led == Led.PUMP_OFF && !on -> if (!pumpOffLedDigitalOutput.isLow) pumpOffLedDigitalOutput.low()
 
-            led == Led.PUMP_ON && on -> pumpOnLedDigitalOutput.high()
-            led == Led.PUMP_ON && !on -> pumpOnLedDigitalOutput.low()
+            led == Led.PUMP_ON && on -> if (!pumpOnLedDigitalOutput.isHigh) pumpOnLedDigitalOutput.high()
+            led == Led.PUMP_ON && !on -> if (!pumpOnLedDigitalOutput.isLow) pumpOnLedDigitalOutput.low()
 
-            led == Led.MOESTUIN_AREA && on -> moestuinLedDigitalOutput.high()
-            led == Led.MOESTUIN_AREA && !on -> moestuinLedDigitalOutput.low()
+            led == Led.MOESTUIN_AREA && on -> if (!moestuinLedDigitalOutput.isHigh) moestuinLedDigitalOutput.high()
+            led == Led.MOESTUIN_AREA && !on -> if (!moestuinLedDigitalOutput.isLow) moestuinLedDigitalOutput.low()
 
-            led == Led.GAZON_AREA && on -> gazonLedDigitalOutput.high()
-            led == Led.GAZON_AREA && !on -> gazonLedDigitalOutput.low()
+            led == Led.GAZON_AREA && on -> if (!gazonLedDigitalOutput.isHigh) gazonLedDigitalOutput.high()
+            led == Led.GAZON_AREA && !on -> if (!gazonLedDigitalOutput.isLow) gazonLedDigitalOutput.low()
         }
     }
 

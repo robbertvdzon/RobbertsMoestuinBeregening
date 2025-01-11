@@ -8,6 +8,7 @@ import com.vdzon.irrigation.components.controller.Controller
 import com.vdzon.irrigation.components.hardware.impl.HardwareImpl
 import com.vdzon.irrigation.components.hardware.mockimpl.HardwareMock
 import com.vdzon.irrigation.components.log.Log
+import com.vdzon.irrigation.components.network.api.NetworkListener
 import java.net.NetworkInterface
 import kotlin.concurrent.thread
 
@@ -40,25 +41,28 @@ object Main {
         val firebaseProducer = FirebaseProducer(dbFirestore, COLLECTION, STATUS_DOCUMENT)
         val controller = Controller(hardware, firebaseProducer)
 
-        val commandProcessor = BewateringCommandProcessor(controller)
+        val commandProcessor = BewateringCommandProcessor()
         val firebaseListener = FirebaseListener(COLLECTION, COMMANDS_DOCUMENT, commandProcessor)
 
         // instantiate the Firestore database and start listening for commands
         firebaseListener.processCommands(dbFirestore)
         updateNetworkIp(controller)
+        hardware.registerSwitchListener(controller)
+        commandProcessor.registerListener(controller)
         hardware.start()
     }
 
-    fun updateNetworkIp(controller: Controller) {
+    /*
+    TODO: Deze funtie in een Network module!!
+     */
+    fun updateNetworkIp(networkListener: NetworkListener) {
         thread {
             var currentIpAdress = getCurrentIPv4Address()
-            println("TEST 1 $currentIpAdress")
-
-            controller.setIp(currentIpAdress)
+            networkListener.setIP(currentIpAdress)
             while (true) {
                 val ip = getCurrentIPv4Address()
                 if (ip != currentIpAdress) {
-                    controller.setIp(ip)
+                    networkListener.setIP(ip)
                     currentIpAdress = ip
                 }
                 if (ip == "not found"){

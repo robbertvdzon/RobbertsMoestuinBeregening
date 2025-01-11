@@ -1,30 +1,28 @@
 package com.vdzon.irrigation.components.controller
 
 import com.vdzon.irrigation.common.CommandProcessor
+import com.vdzon.irrigation.components.commandprocessor.api.CommandProcessorListener
 
 
-class BewateringCommandProcessor(val controller: Controller) : CommandProcessor {
+class BewateringCommandProcessor : CommandProcessor {
+    private var listener: CommandProcessorListener? = null
+
     override fun process(command: String) {
         println("Processing command: $command")
-
-        if (command.startsWith("REQUEST_UPDATE")){
-            controller.startUpdating()
-            return
-        }
-
         val count = command.toIntOrNull()
-        if (count!=null && count>0){
-            println("open $count minuten meer")
-//            controller.encoderUp(count)
+        if (count!=null){
+            listener?.addStopTime(count)
         }
-        if (count!=null && count<0){
-            println("open $count minuten minder")
-//            controller.encoderDown(count*-1)
-        }
-        if (command == "open") {
-            controller.openKlep()
-        } else if (command == "close") {
-            controller.closeKlep()
-        }
+//
+//        if (command.startsWith("REQUEST_UPDATE")) {
+//            controller.startUpdating()
+//            return
+//        }
+//
+    }
+
+    fun registerListener(listener: CommandProcessorListener) {
+        this.listener = listener
+
     }
 }

@@ -1,7 +1,7 @@
 package com.vdzon.irrigation.components.hardware.mockimpl
 
 import com.vdzon.irrigation.components.hardware.api.*
-import com.vdzon.irrigation.model.WateringArea
+import com.vdzon.irrigation.model.IrrigationArea
 import org.jline.terminal.TerminalBuilder
 
 
@@ -15,33 +15,37 @@ class HardwareMock : Hardware {
             val key = terminal.reader().read().toChar()
             when(key){
                 'q' -> {
-                    println("-5")
+                    buttonListener?.onButtonClick(Button.MIN_5_MINUTES)
                 }
                 'w' -> {
-                    println("+5")
+                    buttonListener?.onButtonClick(Button.PLUS_5_MINUTES)
                 }
                 'e' -> {
-                    println("moestuin")
+                    buttonListener?.onButtonClick(Button.MOESTUIN_AREA)
                 }
                 'r' -> {
-                    println("gazon")
+                    buttonListener?.onButtonClick(Button.GAZON_AREA)
                 }
             }
         }
     }
 
-    override fun setPump(on: Boolean) {
+    private var lastPumpState: Boolean? = null
+    override fun setPump(pumpState: Boolean) {
         when {
-            on -> println("PUMP ON")
-            !on -> println("PUMP OFF")
+            pumpState -> if (lastPumpState==false) println("PUMP ON")
+            !pumpState -> if (lastPumpState==true) println("PUMP OFF")
         }
+        lastPumpState = pumpState
     }
 
-    override fun setArea(area: WateringArea) {
+    private var lastArea : IrrigationArea? = null
+    override fun setArea(area: IrrigationArea) {
         when (area) {
-            WateringArea.MOESTUIN -> println("SET AREA TO MOESTUIN")
-            WateringArea.GAZON -> println("SET AREA TO GAZON")
+            IrrigationArea.MOESTUIN -> if (lastArea!=IrrigationArea.MOESTUIN) println("SET AREA TO MOESTUIN")
+            IrrigationArea.GAZON -> if (lastArea!=IrrigationArea.GAZON) println("SET AREA TO GAZON")
         }
+        lastArea = area
     }
 
     override fun setLedState(led: Led, on: Boolean) {
@@ -61,7 +65,7 @@ class HardwareMock : Hardware {
     }
 
     override fun displayLine(lineNr: Int, line: String){
-        println("DISPLAY, LINE $lineNr : $line")
+//        println("DISPLAY, LINE $lineNr : $line")
     }
 
     override fun registerSwitchListener(buttonListener: ButtonListener){
