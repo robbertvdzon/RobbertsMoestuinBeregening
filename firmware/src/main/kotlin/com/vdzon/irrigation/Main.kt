@@ -3,16 +3,14 @@ package com.vdzon.irrigation
 import com.vdzon.irrigation.common.FirebaseConfig
 import com.vdzon.irrigation.common.FirebaseListener
 import com.vdzon.irrigation.common.FirebaseProducer
-import com.vdzon.irrigation.components.controller.BewateringCommandProcessor
+import com.vdzon.irrigation.components.commandprocessor.impl.BewateringCommandProcessor
 import com.vdzon.irrigation.components.controller.Controller
+import com.vdzon.irrigation.components.controller.ControllerImpl
 import com.vdzon.irrigation.components.hardware.impl.HardwareImpl
 import com.vdzon.irrigation.components.hardware.mockimpl.HardwareMock
 import com.vdzon.irrigation.components.log.Log
 import com.vdzon.irrigation.components.network.api.Network
-import com.vdzon.irrigation.components.network.api.NetworkListener
 import com.vdzon.irrigation.components.network.impl.NetworkImpl
-import java.net.NetworkInterface
-import kotlin.concurrent.thread
 
 object Main {
 
@@ -42,18 +40,19 @@ object Main {
         val firebaseConfig = FirebaseConfig(serviceAccountFile, DATABASE_URL)
         val dbFirestore = firebaseConfig.initializeFirestore()
         val firebaseProducer = FirebaseProducer(dbFirestore, COLLECTION, STATUS_DOCUMENT)
-        val controller = Controller(hardware, firebaseProducer)
+        val controller: Controller = ControllerImpl(hardware, firebaseProducer)
 
         val commandProcessor = BewateringCommandProcessor()
         val firebaseListener = FirebaseListener(COLLECTION, COMMANDS_DOCUMENT, commandProcessor)
 
-        // instantiate the Firestore database and start listening for commands
+
         firebaseListener.processCommands(dbFirestore)
         hardware.registerSwitchListener(controller)
         commandProcessor.registerListener(controller)
         network.registerNetworkListener(controller)
         hardware.start()
         network.start()
+        controller.start()
     }
 
 

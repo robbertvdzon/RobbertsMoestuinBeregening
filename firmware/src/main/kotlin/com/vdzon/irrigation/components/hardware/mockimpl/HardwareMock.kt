@@ -57,20 +57,12 @@ class HardwareMock : Hardware {
         lastArea = area
     }
 
+    private val lastLedState: MutableMap<Led, Boolean> = mutableMapOf()
     override fun setLedState(led: Led, on: Boolean) {
-        when {
-            led == Led.PUMP_OFF && on -> println("LED 'PUMP_OFF' : on")
-            led == Led.PUMP_OFF && !on -> println("LED 'PUMP_OFF' : off")
-
-            led == Led.PUMP_ON && on -> println("LED 'PUMP_ON' : on")
-            led == Led.PUMP_ON && !on -> println("LED 'PUMP_ON' : off")
-
-            led == Led.MOESTUIN_AREA && on -> println("LED 'MOESTUIN' : on")
-            led == Led.MOESTUIN_AREA && !on -> println("LED 'MOESTUIN' : off")
-
-            led == Led.GAZON_AREA && on -> println("LED 'GAZON' : on")
-            led == Led.GAZON_AREA && !on -> println("LED 'GAZON' : off")
+        if ( lastLedState[led] != on){
+            println("LED $led : $on")
         }
+        lastLedState[led] = on
     }
 
     override fun displayLine(lineNr: Int, line: String) {

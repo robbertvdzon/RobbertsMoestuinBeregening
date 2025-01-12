@@ -1,4 +1,4 @@
-package com.vdzon.irrigation.components.controller
+package com.vdzon.irrigation.components.commandprocessor.impl
 
 import com.vdzon.irrigation.components.commandprocessor.api.CommandProcessor
 import com.vdzon.irrigation.components.commandprocessor.api.CommandProcessorListener
