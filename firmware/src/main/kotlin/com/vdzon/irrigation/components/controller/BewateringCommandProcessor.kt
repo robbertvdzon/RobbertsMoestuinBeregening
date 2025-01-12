@@ -1,6 +1,6 @@
 package com.vdzon.irrigation.components.controller
 
-import com.vdzon.irrigation.common.CommandProcessor
+import com.vdzon.irrigation.components.commandprocessor.api.CommandProcessor
 import com.vdzon.irrigation.components.commandprocessor.api.CommandProcessorListener
 
 

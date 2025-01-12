@@ -64,8 +64,13 @@ class HardwareImpl(val log: Log) : Hardware {
     override fun registerSwitchListener(switchListener: ButtonListener) {
         this.buttonListener = switchListener
     }
-
     override fun start() {
+        thread(start = true) {
+            startHardware()
+        }
+    }
+
+    private fun startHardware() {
         pi4j = buildPi4j()
         Runtime.getRuntime().addShutdownHook(Thread {
             println("Releasing GPIO resources...")

@@ -8,7 +8,9 @@ import com.vdzon.irrigation.components.controller.Controller
 import com.vdzon.irrigation.components.hardware.impl.HardwareImpl
 import com.vdzon.irrigation.components.hardware.mockimpl.HardwareMock
 import com.vdzon.irrigation.components.log.Log
+import com.vdzon.irrigation.components.network.api.Network
 import com.vdzon.irrigation.components.network.api.NetworkListener
+import com.vdzon.irrigation.components.network.impl.NetworkImpl
 import java.net.NetworkInterface
 import kotlin.concurrent.thread
 
@@ -31,6 +33,7 @@ object Main {
         val remote = System.getProperty("os.name").contains("OS X")
         val log = Log()
         val hardware = if (remote) HardwareMock() else HardwareImpl(log)
+        val network: Network = NetworkImpl()
         // when host is OSX, use the SERVICE_ACCOUNT_FILE_OSX, when linux use SERVICE_ACCOUNT_FILE_LINUX
         println("OS NAME: ${System.getProperty("os.name")}")
         val serviceAccountFile =
@@ -46,53 +49,13 @@ object Main {
 
         // instantiate the Firestore database and start listening for commands
         firebaseListener.processCommands(dbFirestore)
-        updateNetworkIp(controller)
         hardware.registerSwitchListener(controller)
         commandProcessor.registerListener(controller)
+        network.registerNetworkListener(controller)
         hardware.start()
-    }
-
-    /*
-    TODO: Deze funtie in een Network module!!
-     */
-    fun updateNetworkIp(networkListener: NetworkListener) {
-        thread {
-            var currentIpAdress = getCurrentIPv4Address()
-            networkListener.setIP(currentIpAdress)
-            while (true) {
-                val ip = getCurrentIPv4Address()
-                if (ip != currentIpAdress) {
-                    networkListener.setIP(ip)
-                    currentIpAdress = ip
-                }
-                if (ip == "not found"){
-                    Thread.sleep(5 * 1000)// check every5 seond minute when ip was not found before
-                }
-                else{
-                    Thread.sleep(60 * 1000)// check every minute when ip was already found
-                }
-            }
-
-        }
+        network.start()
     }
 
 
-    fun getCurrentIPv4Address(): String {
-        val networkInterfaces = NetworkInterface.getNetworkInterfaces()
-        while (networkInterfaces.hasMoreElements()) {
-            val networkInterface = networkInterfaces.nextElement()
-            val inetAddresses = networkInterface.inetAddresses
-            while (inetAddresses.hasMoreElements()) {
-                val inetAddress = inetAddresses.nextElement()
-                if (!inetAddress.isLoopbackAddress && inetAddress.isSiteLocalAddress && inetAddress.hostAddress.indexOf(
-                        ':'
-                    ) == -1
-                ) {
-                    return inetAddress.hostAddress
-                }
-            }
-        }
-        return "not found"
-    }
 
 }

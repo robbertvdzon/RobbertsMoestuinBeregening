@@ -4,6 +4,7 @@ import com.google.cloud.firestore.DocumentReference
 import com.google.cloud.firestore.DocumentSnapshot
 import com.google.cloud.firestore.FieldValue
 import com.google.cloud.firestore.Firestore
+import com.vdzon.irrigation.components.commandprocessor.api.CommandProcessor
 import java.util.concurrent.Executors
 
 class FirebaseListener(

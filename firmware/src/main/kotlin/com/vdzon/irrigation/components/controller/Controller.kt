@@ -26,6 +26,9 @@ class Controller(
         thread(start = true) {
             updateHardwareThread()
         }
+        thread(start = true) {
+            checkSchedulesThread()
+        }
     }
 
     override fun onButtonClick(button: Button) {
@@ -68,8 +71,8 @@ class Controller(
 
     }
 
-    override fun setIP(ip: String){
-
+    override fun setIP(ip: String) {
+        this.currentIP = ip
     }
 
 
@@ -78,7 +81,6 @@ class Controller(
      */
     fun updateHardwareThread() {
         while (true) {
-            checkSchedules()
             ensurePumpState()
             ensureIrrigationAreState()
             updateDisplay()
@@ -88,7 +90,7 @@ class Controller(
     }
 
     /*
-    Make sure that the output of the pi is the same as the requested state
+    Check once a minute to see if a schedule needs to be started
      */
     fun checkSchedulesThread() {
         while (true) {
