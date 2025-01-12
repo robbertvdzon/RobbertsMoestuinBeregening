@@ -70,9 +70,11 @@ class HardwareMock : Hardware {
         if (lastLine[lineNr] != line) {
             lastLine[lineNr] = line
             if (lineNr != 1) {// do not display the screen update because of the alive char, so skip line 1
+                println("--------------------")
                 (1..4).forEach { lineNr ->
                     println(lastLine[lineNr])
                 }
+                println("--------------------")
             }
         }
     }

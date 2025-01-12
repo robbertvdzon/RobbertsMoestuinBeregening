@@ -18,5 +18,7 @@ data class Timestamp (
             val minute = dateTime.minute
             return Timestamp(year, month, day, hour, minute)
         }
+
+        fun now(): Timestamp = fromTime(LocalDateTime.now())
     }
 }

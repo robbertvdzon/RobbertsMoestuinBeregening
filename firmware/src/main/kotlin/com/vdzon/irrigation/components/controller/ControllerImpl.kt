@@ -68,10 +68,14 @@ class ControllerImpl(
     }
 
     override fun addSchedule(schedule: Schedule) {
+        schedules.schedules.add(schedule)
         saveSchedule()
     }
 
     override fun removeSchedule(id: String) {
+        val schedule = schedules.schedules.firstOrNull { it.id == id }
+        if (schedule == null) return
+        schedules.schedules.remove(schedule)
         saveSchedule()
     }
 
@@ -105,7 +109,6 @@ class ControllerImpl(
         } catch (e: Exception) {
             return Schedules()
         }
-
     }
 
 
@@ -134,9 +137,22 @@ class ControllerImpl(
 
     private fun checkSchedules() {
         /*
-        Check schedules, if the time (in minutes) is the start time of a schedule, then set
-        the requiredStop time and requiredArea
+        TODO TODO TODO
+        TODO TODO TODO
+        TODO TODO TODO
+        Hou rekening met "Om de 2 dagen"
+        Bereken dit vanaf de startDatum
          */
+        val now = Timestamp.now()
+        schedules.schedules.forEach { schedule ->
+            if (schedule.startSchedule == now && schedule.enabled == true) {
+                val currentTime = LocalDateTime.now()
+                val closeTime = currentTime
+                    .plusMinutes(schedule.duration.toLong())
+                requestedState.closeTime = closeTime
+                requestedState.irrigationArea = schedule.erea
+            }
+        }
     }
 
     private fun ensurePumpState() {
@@ -162,12 +178,15 @@ class ControllerImpl(
         val aliveChar = getAliveChar()
         hardware.displayLine(1, "IP   : $currentIP $aliveChar")
         hardware.displayLine(2, "Area : ${requestedState.irrigationArea.name}")
-        hardware.displayLine(3, "Next : ${requestedState.irrigationArea.name}")// TODO: next schedule zoeken
+        hardware.displayLine(3, "Next : ${getNextSchedule()}")
         hardware.displayLine(4, "Timer: ${getTimerTime()}")
     }
 
-    private fun getAliveChar() = if (LocalDateTime.now().second % 2 == 0) "-" else "|"
+    private fun getNextSchedule(): String {
+        return "MA 07:00, GA"
+    }
 
+    private fun getAliveChar() = if (LocalDateTime.now().second % 2 == 0) "-" else "|"
 
     private fun getTimerTime(): String {
         val currentTime = LocalDateTime.now()
