@@ -122,11 +122,22 @@ class ControllerImpl(
 
     private fun ensureIrrigationAreState() {
         hardware.setArea(requestedIrrigationArea)
-        hardware.setLedState(Led.GAZON_AREA, requestedIrrigationArea==IrrigationArea.GAZON)
-        hardware.setLedState(Led.MOESTUIN_AREA, requestedIrrigationArea==IrrigationArea.MOESTUIN)
+        hardware.setLedState(Led.GAZON_AREA, requestedIrrigationArea == IrrigationArea.GAZON)
+        hardware.setLedState(Led.MOESTUIN_AREA, requestedIrrigationArea == IrrigationArea.MOESTUIN)
     }
 
     private fun updateDisplay() {
+        val aliveChar = getAliveChar()
+        hardware.displayLine(1, "IP   : $currentIP $aliveChar")
+        hardware.displayLine(2, "Area : ${requestedIrrigationArea.name}")
+        hardware.displayLine(3, "Next : ${requestedIrrigationArea.name}")// TODO: next schedule zoeken
+        hardware.displayLine(4, "Timer: ${getTimerTime()}")
+    }
+
+    private fun getAliveChar() = if (LocalDateTime.now().second % 2 == 0) "-" else "|"
+
+
+    private fun getTimerTime(): String {
         val currentTime = LocalDateTime.now()
         val secondsRemainingUntilClose = currentTime.until(requestedCloseTime, java.time.temporal.ChronoUnit.SECONDS)
         val closeTimeInFuture = secondsRemainingUntilClose > 0
@@ -136,10 +147,11 @@ class ControllerImpl(
             val minutes = duration.toMinutesPart()
             val seconds = duration.toSecondsPart()
             val formattedDuration = String.format("%02d:%02d:%02d", hours, minutes, seconds)
-            hardware.displayLine(3, "$formattedDuration")
+            return formattedDuration
         } else {
-            hardware.displayLine(3, "")
+            return "00:00"
         }
+
     }
 
     private fun updateFirebase() {

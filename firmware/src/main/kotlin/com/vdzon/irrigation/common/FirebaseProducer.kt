@@ -10,17 +10,12 @@ class FirebaseProducer(
     private val document: String,
 ) {
     private var lastViewModel: ViewModel? = null
-    private var lastData: String? = null
-    private val lastStatus: String = ""
-    private var nrUpdates =0
-/*
-Waarom in common data? dit is niet echt common!
- */
+    /*
+    Waarom in common module? dit is niet echt common!
+     */
 
     fun setState(viewModel: ViewModel) {
-        if (lastViewModel==viewModel) return
-
-        println("Write viewModel to firebase: $viewModel")
+        if (lastViewModel == viewModel) return
         val documentRef = dbFirestore?.collection(collection)?.document(document)
         documentRef?.set(mapOf("viewModel" to viewModel), SetOptions.merge())
         lastViewModel = viewModel

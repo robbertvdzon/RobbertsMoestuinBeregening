@@ -59,14 +59,22 @@ class HardwareMock : Hardware {
 
     private val lastLedState: MutableMap<Led, Boolean> = mutableMapOf()
     override fun setLedState(led: Led, on: Boolean) {
-        if ( lastLedState[led] != on){
+        if (lastLedState[led] != on) {
             println("LED $led : $on")
         }
         lastLedState[led] = on
     }
 
+    private val lastLine: MutableMap<Int, String> = mutableMapOf()
     override fun displayLine(lineNr: Int, line: String) {
-//        println("DISPLAY, LINE $lineNr : $line")
+        if (lastLine[lineNr] != line) {
+            lastLine[lineNr] = line
+            if (lineNr != 1) {// do not display the screen update because of the alive char, so skip line 1
+                (1..4).forEach { lineNr ->
+                    println(lastLine[lineNr])
+                }
+            }
+        }
     }
 
     override fun registerSwitchListener(buttonListener: ButtonListener) {
