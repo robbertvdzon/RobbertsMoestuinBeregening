@@ -1,17 +1,17 @@
 package com.vdzon.irrigation.components.controller
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.vdzon.irrigation.common.FirebaseProducer
-import com.vdzon.irrigation.components.commandprocessor.api.CommandProcessorListener
 import com.vdzon.irrigation.components.hardware.api.Button
 import com.vdzon.irrigation.components.hardware.api.Hardware
-import com.vdzon.irrigation.components.hardware.api.ButtonListener
 import com.vdzon.irrigation.components.hardware.api.Led
-import com.vdzon.irrigation.components.network.api.NetworkListener
 import com.vdzon.irrigation.model.*
 import com.vdzon.irrigation.model.view.ViewModel
+import java.io.File
+import java.time.Duration
 import java.time.LocalDateTime
 import kotlin.concurrent.thread
-import java.time.Duration
 
 class ControllerImpl(
     val hardware: Hardware,
@@ -19,9 +19,10 @@ class ControllerImpl(
 
 ) : Controller {
     // status
-    private var requestedCloseTime: LocalDateTime = LocalDateTime.now()
-    private var requestedIrrigationArea: IrrigationArea = IrrigationArea.MOESTUIN
+    private var requestedState = loadState()
+    private var schedules = loadSchedules()
     private var currentIP: String = "Unknown"
+    private val objectMapper: ObjectMapper = jacksonObjectMapper()
 
     override fun start() {
         thread(start = true) {
@@ -57,23 +58,54 @@ class ControllerImpl(
     }
 
     override fun addStopTime(minutes: Int) {
-        requestedCloseTime = requestedCloseTime.plusMinutes(minutes.toLong())
+        requestedState.closeTime = requestedState.closeTime.plusMinutes(minutes.toLong())
+        saveState()
     }
 
     override fun changeIrrigationArea(area: IrrigationArea) {
-        this.requestedIrrigationArea = area
+        requestedState.irrigationArea = area
+        saveState()
     }
 
     override fun addSchedule(schedule: Schedule) {
-
+        saveSchedule()
     }
 
     override fun removeSchedule(id: String) {
-
+        saveSchedule()
     }
 
     override fun setIP(ip: String) {
         this.currentIP = ip
+    }
+
+    fun saveSchedule() {
+        val file = File("schedules.json")
+        objectMapper.writeValue(file, schedules)
+    }
+
+    fun saveState() {
+        val file = File("state.json")
+        objectMapper.writeValue(file, requestedState)
+    }
+
+    fun loadState(): State {
+        val file = File("state.json")
+        try {
+            return objectMapper.readValue(file, State::class.java)
+        } catch (e: Exception) {
+            return State()
+        }
+    }
+
+    fun loadSchedules(): Schedules {
+        val file = File("schedules.json")
+        try {
+            return objectMapper.readValue(file, Schedules::class.java)
+        } catch (e: Exception) {
+            return Schedules()
+        }
+
     }
 
 
@@ -108,7 +140,7 @@ class ControllerImpl(
     }
 
     private fun ensurePumpState() {
-        val closeTimeInFuture = requestedCloseTime.isAfter(LocalDateTime.now())
+        val closeTimeInFuture = requestedState.closeTime.isAfter(LocalDateTime.now())
         if (closeTimeInFuture) {
             hardware.setPump(true)
             hardware.setLedState(Led.PUMP_ON, true)
@@ -121,16 +153,16 @@ class ControllerImpl(
     }
 
     private fun ensureIrrigationAreState() {
-        hardware.setArea(requestedIrrigationArea)
-        hardware.setLedState(Led.GAZON_AREA, requestedIrrigationArea == IrrigationArea.GAZON)
-        hardware.setLedState(Led.MOESTUIN_AREA, requestedIrrigationArea == IrrigationArea.MOESTUIN)
+        hardware.setArea(requestedState.irrigationArea)
+        hardware.setLedState(Led.GAZON_AREA, requestedState.irrigationArea == IrrigationArea.GAZON)
+        hardware.setLedState(Led.MOESTUIN_AREA, requestedState.irrigationArea == IrrigationArea.MOESTUIN)
     }
 
     private fun updateDisplay() {
         val aliveChar = getAliveChar()
         hardware.displayLine(1, "IP   : $currentIP $aliveChar")
-        hardware.displayLine(2, "Area : ${requestedIrrigationArea.name}")
-        hardware.displayLine(3, "Next : ${requestedIrrigationArea.name}")// TODO: next schedule zoeken
+        hardware.displayLine(2, "Area : ${requestedState.irrigationArea.name}")
+        hardware.displayLine(3, "Next : ${requestedState.irrigationArea.name}")// TODO: next schedule zoeken
         hardware.displayLine(4, "Timer: ${getTimerTime()}")
     }
 
@@ -139,10 +171,11 @@ class ControllerImpl(
 
     private fun getTimerTime(): String {
         val currentTime = LocalDateTime.now()
-        val secondsRemainingUntilClose = currentTime.until(requestedCloseTime, java.time.temporal.ChronoUnit.SECONDS)
+        val secondsRemainingUntilClose =
+            currentTime.until(requestedState.closeTime, java.time.temporal.ChronoUnit.SECONDS)
         val closeTimeInFuture = secondsRemainingUntilClose > 0
         if (closeTimeInFuture) {
-            val duration: Duration = Duration.between(currentTime, requestedCloseTime)
+            val duration: Duration = Duration.between(currentTime, requestedState.closeTime)
             val hours = duration.toHours()
             val minutes = duration.toMinutesPart()
             val seconds = duration.toSecondsPart()
@@ -155,12 +188,12 @@ class ControllerImpl(
     }
 
     private fun updateFirebase() {
-        val closeTimeInFuture = requestedCloseTime.isAfter(LocalDateTime.now())
+        val closeTimeInFuture = requestedState.closeTime.isAfter(LocalDateTime.now())
         val viewModel = ViewModel(
             ipAddress = currentIP,
             pumpStatus = if (closeTimeInFuture) PumpStatus.OPEN else PumpStatus.CLOSE,
-            currentIrrigationArea = requestedIrrigationArea,
-            pumpingEndTime = Timestamp.fromTime(requestedCloseTime),
+            currentIrrigationArea = requestedState.irrigationArea,
+            pumpingEndTime = Timestamp.fromTime(requestedState.closeTime),
             schedules = emptyList(),
             nextSchedule = null,
         )
