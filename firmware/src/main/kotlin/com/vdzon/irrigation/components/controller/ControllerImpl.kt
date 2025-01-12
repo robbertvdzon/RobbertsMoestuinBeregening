@@ -1,6 +1,7 @@
 package com.vdzon.irrigation.components.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.vdzon.irrigation.common.FirebaseProducer
 import com.vdzon.irrigation.components.hardware.api.Button
@@ -18,13 +19,15 @@ class ControllerImpl(
     val firebaseProducer: FirebaseProducer
 
 ) : Controller {
-    // status
-    private var requestedState = loadState()
-    private var schedules = loadSchedules()
+    private var requestedState: State = State()
+    private var schedules: Schedules = Schedules()
     private var currentIP: String = "Unknown"
     private val objectMapper: ObjectMapper = jacksonObjectMapper()
 
     override fun start() {
+        objectMapper.registerModule(JavaTimeModule())
+        requestedState = loadState()
+        schedules = loadSchedules()
         thread(start = true) {
             updateHardwareThread()
         }
@@ -98,6 +101,7 @@ class ControllerImpl(
         try {
             return objectMapper.readValue(file, State::class.java)
         } catch (e: Exception) {
+            e.printStackTrace()
             return State()
         }
     }
@@ -107,6 +111,7 @@ class ControllerImpl(
         try {
             return objectMapper.readValue(file, Schedules::class.java)
         } catch (e: Exception) {
+            e.printStackTrace()
             return Schedules()
         }
     }
