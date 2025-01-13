@@ -1,6 +1,7 @@
 package com.vdzon.irrigation.model
 
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 data class Timestamp (
     val year: Int,
@@ -9,6 +10,23 @@ data class Timestamp (
     val hour: Int,
     val minute: Int,
 ){
+
+    fun isAfterOrEqual(other: Timestamp): Boolean{
+        val thisLocalDateTime = this.toLocalDateTime()
+        val otherLocalDateTime = other.toLocalDateTime()
+        return thisLocalDateTime.isAfter(otherLocalDateTime) || thisLocalDateTime.isEqual(otherLocalDateTime)
+    }
+
+    fun isBeforeOrEqual(other: Timestamp): Boolean{
+        val thisLocalDateTime = this.toLocalDateTime()
+        val otherLocalDateTime = other.toLocalDateTime()
+        return thisLocalDateTime.isBefore(otherLocalDateTime) || thisLocalDateTime.isEqual(otherLocalDateTime)
+    }
+    fun toLocalDateTime(): LocalDateTime = LocalDateTime.of(year, month, day, hour, minute)
+
+    fun plusDays(days: Long): Timestamp = fromTime(this.toLocalDateTime().plusDays(days))
+    fun toEpochSecond() = toLocalDateTime().toEpochSecond(ZoneOffset.UTC)
+
     companion object{
         fun fromTime(dateTime: LocalDateTime): Timestamp{
             val year = dateTime.year

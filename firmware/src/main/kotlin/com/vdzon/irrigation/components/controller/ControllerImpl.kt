@@ -10,6 +10,7 @@ import com.vdzon.irrigation.components.hardware.api.Led
 import com.vdzon.irrigation.model.*
 import com.vdzon.irrigation.model.view.ViewModel
 import java.io.File
+import java.time.DayOfWeek
 import java.time.Duration
 import java.time.LocalDateTime
 import kotlin.concurrent.thread
@@ -141,16 +142,10 @@ class ControllerImpl(
     }
 
     private fun checkSchedules() {
-        /*
-        TODO TODO TODO
-        TODO TODO TODO
-        TODO TODO TODO
-        Hou rekening met "Om de 2 dagen"
-        Bereken dit vanaf de startDatum
-         */
         val now = Timestamp.now()
         schedules.schedules.forEach { schedule ->
-            if (schedule.startSchedule == now && schedule.enabled == true) {
+            val nextSchedule = schedule.findFirstSchedule(now)
+            if (now == nextSchedule) {
                 val currentTime = LocalDateTime.now()
                 val closeTime = currentTime
                     .plusMinutes(schedule.duration.toLong())
@@ -188,7 +183,35 @@ class ControllerImpl(
     }
 
     private fun getNextSchedule(): String {
-        return "MA 07:00, GA"
+        val now = Timestamp.now()
+        val nextSchudules = schedules
+            .schedules
+            .filter { it.findFirstSchedule(now)!=null }
+            .sortedBy { it.findFirstSchedule(now)?.toEpochSecond()?:Long.MAX_VALUE }
+        val firstSchedule = nextSchudules.firstOrNull()
+        val firstTimestamp = firstSchedule?.findFirstSchedule(now)
+        if (firstTimestamp==null) return "Geen planning"
+        val dayOfWeek = mapDayOfWeek(firstTimestamp.toLocalDateTime().dayOfWeek)
+        val hour = if (firstTimestamp.hour<10) "0${firstTimestamp.hour}" else "${firstTimestamp.hour}"
+        val minute = if (firstTimestamp.minute<10) "0${firstTimestamp.minute}" else "${firstTimestamp.minute}"
+        val area = mapArea(firstSchedule.erea)
+        val time = "$hour:$minute"
+            return "$dayOfWeek $time, $area"
+    }
+
+    private fun mapDayOfWeek(dow: DayOfWeek) = when(dow){
+        DayOfWeek.MONDAY -> "Ma"
+        DayOfWeek.TUESDAY -> "Di"
+        DayOfWeek.WEDNESDAY -> "Wo"
+        DayOfWeek.THURSDAY -> "Do"
+        DayOfWeek.FRIDAY -> "Vr"
+        DayOfWeek.SATURDAY -> "Za"
+        DayOfWeek.SUNDAY -> "Zo"
+    }
+
+    private fun mapArea(area: IrrigationArea) = when(area){
+        IrrigationArea.MOESTUIN -> "Moestuin"
+        IrrigationArea.GAZON -> "Gazon"
     }
 
     private fun getAliveChar() = if (LocalDateTime.now().second % 2 == 0) "-" else "|"

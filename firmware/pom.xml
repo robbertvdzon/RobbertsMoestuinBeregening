@@ -16,6 +16,8 @@
             <pi4j.version>2.7.0</pi4j.version>
             <jline.version>3.28.0</jline.version>
             <jackson-module-kotlin.version>2.9.8</jackson-module-kotlin.version>
+            <assertj-core.version>3.27.2</assertj-core.version>
+            <junit-jupiter-engine.version>5.11.4</junit-jupiter-engine.version>
         </properties>
 
         <dependencies>
@@ -82,6 +84,20 @@
                 <groupId>com.google.firebase</groupId>
                 <artifactId>firebase-admin</artifactId>
                 <version>9.3.0</version>
+            </dependency>
+
+
+            <!-- Tests dependencies-->
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-engine</artifactId>
+                <version>${junit-jupiter-engine.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>${assertj-core.version}</version>
             </dependency>
 
         </dependencies>
