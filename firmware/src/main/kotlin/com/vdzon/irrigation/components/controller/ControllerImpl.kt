@@ -13,6 +13,8 @@ import java.io.File
 import java.time.DayOfWeek
 import java.time.Duration
 import java.time.LocalDateTime
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 
 class ControllerImpl(
@@ -32,9 +34,7 @@ class ControllerImpl(
         thread(start = true) {
             updateHardwareThread()
         }
-        thread(start = true) {
-            checkSchedulesThread()
-        }
+        startSchedulesThread()
     }
 
     override fun onButtonClick(button: Button) {
@@ -134,11 +134,17 @@ class ControllerImpl(
     /*
     Check once a minute to see if a schedule needs to be started
      */
-    private fun checkSchedulesThread() {
-        while (true) {
+    private fun startSchedulesThread() {
+        val executor = Executors.newSingleThreadScheduledExecutor()
+        // Calcule the time before the next minute
+        val now = LocalDateTime.now()
+        val nextMinute = now.withSecond(0).withNano(0).plusMinutes(1)
+        val delayInMillis = Duration.between(now, nextMinute).toMillis()
+
+        // Start the check in the first second of every minute
+        executor.scheduleAtFixedRate({
             checkSchedules()
-            sleep(1000 * 60)// sleep for a minute
-        }
+        }, delayInMillis, 60_000, TimeUnit.MILLISECONDS)
     }
 
     private fun checkSchedules() {
@@ -151,6 +157,7 @@ class ControllerImpl(
                     .plusMinutes(schedule.duration.toLong())
                 requestedState.closeTime = closeTime
                 requestedState.irrigationArea = schedule.erea
+                saveState()
             }
         }
     }
@@ -186,20 +193,21 @@ class ControllerImpl(
         val now = Timestamp.now()
         val nextSchudules = schedules
             .schedules
-            .filter { it.findFirstSchedule(now)!=null }
-            .sortedBy { it.findFirstSchedule(now)?.toEpochSecond()?:Long.MAX_VALUE }
+            .filter { it.findFirstSchedule(now) != null }
+            .filter { it.findFirstSchedule(now) != now }
+            .sortedBy { it.findFirstSchedule(now)?.toEpochSecond() ?: Long.MAX_VALUE }
         val firstSchedule = nextSchudules.firstOrNull()
         val firstTimestamp = firstSchedule?.findFirstSchedule(now)
-        if (firstTimestamp==null) return "Geen planning"
+        if (firstTimestamp == null) return "Geen planning"
         val dayOfWeek = mapDayOfWeek(firstTimestamp.toLocalDateTime().dayOfWeek)
-        val hour = if (firstTimestamp.hour<10) "0${firstTimestamp.hour}" else "${firstTimestamp.hour}"
-        val minute = if (firstTimestamp.minute<10) "0${firstTimestamp.minute}" else "${firstTimestamp.minute}"
+        val hour = if (firstTimestamp.hour < 10) "0${firstTimestamp.hour}" else "${firstTimestamp.hour}"
+        val minute = if (firstTimestamp.minute < 10) "0${firstTimestamp.minute}" else "${firstTimestamp.minute}"
         val area = mapArea(firstSchedule.erea)
         val time = "$hour:$minute"
-            return "$dayOfWeek $time, $area"
+        return "$dayOfWeek $time, $area"
     }
 
-    private fun mapDayOfWeek(dow: DayOfWeek) = when(dow){
+    private fun mapDayOfWeek(dow: DayOfWeek) = when (dow) {
         DayOfWeek.MONDAY -> "Ma"
         DayOfWeek.TUESDAY -> "Di"
         DayOfWeek.WEDNESDAY -> "Wo"
@@ -209,7 +217,7 @@ class ControllerImpl(
         DayOfWeek.SUNDAY -> "Zo"
     }
 
-    private fun mapArea(area: IrrigationArea) = when(area){
+    private fun mapArea(area: IrrigationArea) = when (area) {
         IrrigationArea.MOESTUIN -> "Moestuin"
         IrrigationArea.GAZON -> "Gazon"
     }
