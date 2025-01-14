@@ -72,6 +72,8 @@ class ControllerImpl(
     }
 
     override fun addSchedule(schedule: Schedule) {
+        // if a schedule with this id exists, remove it forst
+        schedules.schedules.removeIf { it.id == schedule.id }
         schedules.schedules.add(schedule)
         saveSchedule()
     }
@@ -149,6 +151,7 @@ class ControllerImpl(
 
     private fun checkSchedules() {
         val now = Timestamp.now()
+        // check if a schedule needs to be started
         schedules.schedules.forEach { schedule ->
             val nextSchedule = schedule.findFirstSchedule(now)
             if (now == nextSchedule) {
@@ -160,6 +163,13 @@ class ControllerImpl(
                 saveState()
             }
         }
+        // check if a schedule needs to be removed
+        val schedulesToRemove = schedules.schedules.filter {
+                it.endSchedule!=null &&
+                        it.endSchedule.isAfterOrEqual(now)
+            }
+        schedules.schedules.removeAll(schedulesToRemove)
+        saveSchedule()
     }
 
     private fun ensurePumpState() {
