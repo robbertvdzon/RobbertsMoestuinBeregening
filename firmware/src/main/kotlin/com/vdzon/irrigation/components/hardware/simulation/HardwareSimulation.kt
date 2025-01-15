@@ -1,4 +1,4 @@
-package com.vdzon.irrigation.components.hardware.mockimpl
+package com.vdzon.irrigation.components.hardware.simulation
 
 import com.vdzon.irrigation.components.hardware.api.*
 import com.vdzon.irrigation.model.IrrigationArea
@@ -6,7 +6,7 @@ import org.jline.terminal.TerminalBuilder
 import kotlin.concurrent.thread
 
 
-class HardwareMock : Hardware {
+class HardwareSimulation : Hardware {
     private var buttonListener: ButtonListener? = null
     override fun start() {
         thread(start = true) {

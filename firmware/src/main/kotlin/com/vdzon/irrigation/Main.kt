@@ -7,7 +7,7 @@ import com.vdzon.irrigation.components.commandprocessor.impl.BewateringCommandPr
 import com.vdzon.irrigation.components.controller.Controller
 import com.vdzon.irrigation.components.controller.ControllerImpl
 import com.vdzon.irrigation.components.hardware.impl.HardwareImpl
-import com.vdzon.irrigation.components.hardware.mockimpl.HardwareMock
+import com.vdzon.irrigation.components.hardware.simulation.HardwareSimulation
 import com.vdzon.irrigation.components.log.Log
 import com.vdzon.irrigation.components.network.api.Network
 import com.vdzon.irrigation.components.network.impl.NetworkImpl
@@ -23,28 +23,19 @@ object Main {
     private const val COMMANDS_DOCUMENT = "commands"
     private const val STATUS_DOCUMENT = "status"
 
-    // initialize the components
-
-
     @JvmStatic
     fun main(args: Array<String>) {
-        val remote = System.getProperty("os.name").contains("OS X")
         val log = Log()
-        val hardware = if (remote) HardwareMock() else HardwareImpl(log)
+        val development = System.getProperty("os.name").contains("OS X")
+        val hardware = if (development) HardwareSimulation() else HardwareImpl(log)
         val network: Network = NetworkImpl()
-        // when host is OSX, use the SERVICE_ACCOUNT_FILE_OSX, when linux use SERVICE_ACCOUNT_FILE_LINUX
-        println("OS NAME: ${System.getProperty("os.name")}")
-        val serviceAccountFile =
-            if (System.getProperty("os.name").contains("OS X")) SERVICE_ACCOUNT_FILE_OSX else SERVICE_ACCOUNT_FILE_LINUX
-        println("serviceAccountFile: $serviceAccountFile")
+        val serviceAccountFile = if (development) SERVICE_ACCOUNT_FILE_OSX else SERVICE_ACCOUNT_FILE_LINUX
         val firebaseConfig = FirebaseConfig(serviceAccountFile, DATABASE_URL)
         val dbFirestore = firebaseConfig.initializeFirestore()
         val firebaseProducer = FirebaseProducer(dbFirestore, COLLECTION, STATUS_DOCUMENT)
         val controller: Controller = ControllerImpl(hardware, firebaseProducer)
-
         val commandProcessor = BewateringCommandProcessor()
         val firebaseListener = FirebaseListener(COLLECTION, COMMANDS_DOCUMENT, commandProcessor)
-
 
         firebaseListener.processCommands(dbFirestore)
         hardware.registerSwitchListener(controller)
