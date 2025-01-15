@@ -14,7 +14,39 @@ class BewateringCommandProcessor : CommandProcessor {
         println("Processing command: $command")
         val count = command.toIntOrNull()
         if (count != null) {
-            listener?.addStopTime(count)
+            listener?.addIrrigationTime(count)
+        }
+
+        if (command.startsWith("UPDATE_IRRIGATION_TIME")) {
+            val parts = command.split(",")
+            println("UPDATE_IRRIGATION_TIME, with ${parts.size} parts : command=$command")
+            if (parts.size == 2) {
+                val extraMinutes = parts[1].toIntOrNull()
+                if (extraMinutes != null) listener?.addIrrigationTime(extraMinutes)
+            }
+        }
+
+        if (command.startsWith("CHANGE_AREA")) {
+            val parts = command.split(",")
+            println("CHANGE_AREA, with ${parts.size} parts : command=$command")
+            if (parts.size == 2) {
+                val area = IrrigationArea.valueOf(parts[1])
+                listener?.changeIrrigationArea(area)
+            }
+        }
+
+        if (command.startsWith("UPDATE_STATE")) {
+            println("UPDATE_STATE")
+            listener?.updateState()
+        }
+
+        if (command.startsWith("REMOVE_SCHEDULE")) {
+            val parts = command.split(",")
+            println("REMOVE_SCHEDULE, with ${parts.size} parts : command=$command")
+            if (parts.size == 2) {
+                val id = parts[1]
+                listener?.removeSchedule(id)
+            }
         }
 
         if (command.startsWith("ADD_SCHEDULE")) {
@@ -22,69 +54,37 @@ class BewateringCommandProcessor : CommandProcessor {
             println("ADD_SCHEDULE, with ${parts.size} parts : command=$command")
             if (parts.size == 16) {
                 val id = parts[1]
-                val duration = parts[2]
-                val daysInterval = parts[3]
-                val erea = parts[4]
-                val enabled = parts[5]
-                val startYear = parts[6]
-                val startMonth = parts[7]
-                val startDay = parts[8]
-                val startHour = parts[9]
-                val startMinute = parts[10]
-                val endYear = parts[11]
-                val endMonth = parts[12]
-                val endDay = parts[13]
-                val endHour = parts[14]
-                val endMinute = parts[15]
+                val duration = parts[2].toInt()
+                val daysInterval = parts[3].toInt()
+                val area = IrrigationArea.valueOf(parts[4])
+                val enabled = parts[5].toBoolean()
+                val startYear = parts[6].toInt()
+                val startMonth = parts[7].toInt()
+                val startDay = parts[8].toInt()
+                val startHour = parts[9].toInt()
+                val startMinute = parts[10].toInt()
+                val endYear = parts[11].toIntOrNull()
+                val endMonth = parts[12].toIntOrNull()
+                val endDay = parts[13].toIntOrNull()
+                val endHour = parts[14].toIntOrNull()
+                val endMinute = parts[15].toIntOrNull()
+                val startSchedule: Timestamp =
+                    Timestamp.buildTimestamp(startYear, startMonth, startDay, startHour, startMinute)!!
+                val endSchedule: Timestamp? = Timestamp.buildTimestamp(endYear, endMonth, endDay, endHour, endMinute)
+                val schedule = Schedule(
+                    id,
+                    startSchedule,
+                    endSchedule,
+                    duration,
+                    daysInterval,
+                    area,
+                    enabled
+                )
+                listener?.addSchedule(schedule)
             }
-            val startSchedule: Timestamp = Timestamp(2025, 1, 1, 13, 30)
-            val endSchedule: Timestamp? = null
-            val schedule = Schedule(
-                "001",
-                startSchedule,
-                endSchedule,
-                45,
-                1,
-                IrrigationArea.GAZON,
-                true
-            )
-            listener?.addSchedule(schedule)
         }
-
-        if (command.startsWith("TEST1")) {
-            println("ADD_SCHEDULES, TEST")
-            val startSchedule: Timestamp = Timestamp(2025, 1, 1, 13, 30)
-            val endSchedule: Timestamp? = null
-            val schedule = Schedule(
-                "001",
-                startSchedule,
-                endSchedule,
-                45,
-                1,
-                IrrigationArea.GAZON,
-                true
-            )
-            listener?.addSchedule(schedule)
-        }
-
-
-        if (command.startsWith("TEST2")) {
-            println("ADD_SCHEDULES, TEST2")
-            val startSchedule: Timestamp = Timestamp(2025, 1, 1, 21, 30)
-            val endSchedule: Timestamp? = null
-            val schedule = Schedule(
-                "002",
-                startSchedule,
-                endSchedule,
-                50,
-                1,
-                IrrigationArea.MOESTUIN,
-                true
-            )
-            listener?.addSchedule(schedule)
-        }
-
     }
+
 
     fun registerListener(listener: CommandProcessorListener) {
         this.listener = listener

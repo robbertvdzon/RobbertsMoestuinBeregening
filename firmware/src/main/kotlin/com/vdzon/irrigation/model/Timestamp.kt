@@ -38,5 +38,21 @@ data class Timestamp (
         }
 
         fun now(): Timestamp = fromTime(LocalDateTime.now())
+
+
+        fun buildTimestamp(
+            year: Int?,
+            month: Int?,
+            day: Int?,
+            hour: Int?,
+            minute: Int?
+        ):Timestamp? {
+            if (year==null) return null
+            if (month==null) return null
+            if (day==null) return null
+            if (hour==null) return null
+            if (minute==null) return null
+            return Timestamp(year, month, day, hour, minute)
+        }
     }
 }

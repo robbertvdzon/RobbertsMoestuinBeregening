@@ -34,10 +34,19 @@ class FirebaseListener(
         documentRef: DocumentReference
     ) {
         val data = snapshot.data ?: emptyMap()
-        for ((key, value) in data) {
-            commandProcessor.process(value.toString())
+        for ((key, command) in data) {
+            processCommand(command.toString())
             documentRef.update(key, FieldValue.delete())
                 .addListener({ }, executor)
+        }
+    }
+
+    private fun processCommand(command: String) {
+        try {
+            commandProcessor.process(command)
+        }
+        catch (e: Exception){
+            e.printStackTrace()
         }
     }
 

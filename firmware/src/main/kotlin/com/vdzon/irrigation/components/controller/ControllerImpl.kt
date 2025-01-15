@@ -41,12 +41,12 @@ class ControllerImpl(
         when (button) {
             Button.MIN_5_MINUTES -> {
                 println("min 5")
-                addStopTime(-5)
+                addIrrigationTime(-5)
             }
 
             Button.PLUS_5_MINUTES -> {
                 println("plus 5")
-                addStopTime(5)
+                addIrrigationTime(5)
             }
 
             Button.MOESTUIN_AREA -> {
@@ -61,7 +61,7 @@ class ControllerImpl(
         }
     }
 
-    override fun addStopTime(minutes: Int) {
+    override fun addIrrigationTime(minutes: Int) {
         requestedState.closeTime = requestedState.closeTime.plusMinutes(minutes.toLong())
         saveState()
     }
@@ -83,6 +83,10 @@ class ControllerImpl(
         if (schedule == null) return
         schedules.schedules.remove(schedule)
         saveSchedule()
+    }
+
+    override fun updateState() {
+        firebaseProducer.cleanLastState()
     }
 
     override fun setIP(ip: String) {
@@ -165,9 +169,9 @@ class ControllerImpl(
         }
         // check if a schedule needs to be removed
         val schedulesToRemove = schedules.schedules.filter {
-                it.endSchedule!=null &&
-                        it.endSchedule.isAfterOrEqual(now)
-            }
+            it.endSchedule != null &&
+                    it.endSchedule.isAfterOrEqual(now)
+        }
         schedules.schedules.removeAll(schedulesToRemove)
         saveSchedule()
     }
@@ -259,8 +263,8 @@ class ControllerImpl(
             pumpStatus = if (closeTimeInFuture) PumpStatus.OPEN else PumpStatus.CLOSE,
             currentIrrigationArea = requestedState.irrigationArea,
             pumpingEndTime = Timestamp.fromTime(requestedState.closeTime),
-            schedules = emptyList(),
-            nextSchedule = null,
+            schedules = schedules.schedules.map { it.toEnrichedSchedule() },
+            nextSchedule = getNextSchedule(),
         )
         firebaseProducer.setState(viewModel)
     }

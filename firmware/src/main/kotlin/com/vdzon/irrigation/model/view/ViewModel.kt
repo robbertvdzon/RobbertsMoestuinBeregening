@@ -11,5 +11,5 @@ data class ViewModel  (
     val currentIrrigationArea: IrrigationArea,
     val pumpingEndTime: Timestamp,
     val schedules: List<EnrichedSchedule>,
-    val nextSchedule: EnrichedSchedule?,
+    val nextSchedule: String,
 )

@@ -11,6 +11,11 @@ data class Schedule (
     val erea:IrrigationArea,
     val enabled: Boolean
 ){
+
+    fun toEnrichedSchedule(): EnrichedSchedule {
+        return EnrichedSchedule(this, findFirstSchedule(Timestamp.now()))
+    }
+
     fun findFirstSchedule(from: Timestamp): Timestamp?{
         if (!enabled) return null
         if (endSchedule!=null && from.isAfterOrEqual(endSchedule)) return null
