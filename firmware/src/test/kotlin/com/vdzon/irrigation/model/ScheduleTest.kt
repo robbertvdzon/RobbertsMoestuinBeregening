@@ -1,5 +1,8 @@
 package com.vdzon.irrigation.model
 
+import com.vdzon.irrigation.api.model.IrrigationArea
+import com.vdzon.irrigation.api.model.Schedule
+import com.vdzon.irrigation.api.model.Timestamp
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

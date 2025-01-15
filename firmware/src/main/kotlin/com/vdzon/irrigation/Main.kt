@@ -1,16 +1,16 @@
 package com.vdzon.irrigation
 
-import com.vdzon.irrigation.common.FirebaseConfig
-import com.vdzon.irrigation.common.FirebaseListener
-import com.vdzon.irrigation.common.FirebaseProducer
-import com.vdzon.irrigation.components.commandprocessor.impl.BewateringCommandProcessor
-import com.vdzon.irrigation.components.controller.Controller
+import com.vdzon.irrigation.api.controller.Controller
+import com.vdzon.irrigation.api.network.Network
+import com.vdzon.irrigation.components.commandprocessor.BewateringCommandProcessor
 import com.vdzon.irrigation.components.controller.ControllerImpl
-import com.vdzon.irrigation.components.hardware.impl.HardwareImpl
-import com.vdzon.irrigation.components.hardware.simulation.HardwareSimulation
-import com.vdzon.irrigation.components.log.Log
-import com.vdzon.irrigation.components.network.api.Network
-import com.vdzon.irrigation.components.network.impl.NetworkImpl
+import com.vdzon.irrigation.components.firebase.FirebaseConfig
+import com.vdzon.irrigation.components.firebase.FirebaseListener
+import com.vdzon.irrigation.components.firebase.FirebaseProducerImpl
+import com.vdzon.irrigation.components.hardware.HardwareImpl
+import com.vdzon.irrigation.components.hardwaresimulation.HardwareSimulation
+import com.vdzon.irrigation.components.log.LogImpl
+import com.vdzon.irrigation.components.network.NetworkImpl
 
 object Main {
 
@@ -25,14 +25,14 @@ object Main {
 
     @JvmStatic
     fun main(args: Array<String>) {
-        val log = Log()
+        val log = LogImpl()
         val development = System.getProperty("os.name").contains("OS X")
         val hardware = if (development) HardwareSimulation() else HardwareImpl(log)
         val network: Network = NetworkImpl()
         val serviceAccountFile = if (development) SERVICE_ACCOUNT_FILE_OSX else SERVICE_ACCOUNT_FILE_LINUX
         val firebaseConfig = FirebaseConfig(serviceAccountFile, DATABASE_URL)
         val dbFirestore = firebaseConfig.initializeFirestore()
-        val firebaseProducer = FirebaseProducer(dbFirestore, COLLECTION, STATUS_DOCUMENT)
+        val firebaseProducer = FirebaseProducerImpl(dbFirestore, COLLECTION, STATUS_DOCUMENT)
         val controller: Controller = ControllerImpl(hardware, firebaseProducer)
         val commandProcessor = BewateringCommandProcessor()
         val firebaseListener = FirebaseListener(COLLECTION, COMMANDS_DOCUMENT, commandProcessor)
@@ -45,7 +45,6 @@ object Main {
         network.start()
         controller.start()
     }
-
 
 
 }
