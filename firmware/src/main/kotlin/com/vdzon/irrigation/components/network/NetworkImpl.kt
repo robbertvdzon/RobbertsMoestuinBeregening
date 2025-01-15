@@ -22,7 +22,7 @@ class NetworkImpl : Network {
                     currentIpAdress = ip
                 }
                 if (ip == "not found") {
-                    Thread.sleep(5 * 1000)// check every5 seond minute when ip was not found before
+                    Thread.sleep(5 * 1000)// check every 5 seconds when ip was not found before
                 } else {
                     Thread.sleep(60 * 1000)// check every minute when ip was already found
                 }

@@ -64,6 +64,11 @@ class ControllerImpl(
     }
 
     override fun addIrrigationTime(minutes: Int) {
+        val now = LocalDateTime.now()
+        // When current closetime is in the past, then first change it to now
+        if (requestedState.closeTime.isBefore(now)){
+            requestedState.closeTime = now
+        }
         requestedState.closeTime = requestedState.closeTime.plusMinutes(minutes.toLong())
         saveState()
     }
@@ -255,7 +260,6 @@ class ControllerImpl(
         } else {
             return "00:00"
         }
-
     }
 
     private fun updateFirebase() {

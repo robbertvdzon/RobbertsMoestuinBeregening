@@ -87,9 +87,7 @@ class BewateringCommandProcessor(
         }
     }
 
-
     fun registerListener(listener: CommandProcessorListener) {
         this.listener = listener
-
     }
 }

@@ -15,15 +15,17 @@ import java.util.*
 import kotlin.concurrent.thread
 
 
-class HardwareImpl(val log: Log) : Hardware {
-    lateinit var pi4j: Context
-    lateinit var lcd: LcdDisplay
-    lateinit var areaDigitalOutput: DigitalOutput
-    lateinit var pumpDigitalOutput: DigitalOutput
-    lateinit var pumpOnLedDigitalOutput: DigitalOutput
-    lateinit var pumpOffLedDigitalOutput: DigitalOutput
-    lateinit var moestuinLedDigitalOutput: DigitalOutput
-    lateinit var gazonLedDigitalOutput: DigitalOutput
+class HardwareImpl(
+    private val log: Log
+) : Hardware {
+    private lateinit var pi4j: Context
+    private lateinit var lcd: LcdDisplay
+    private lateinit var areaDigitalOutput: DigitalOutput
+    private lateinit var pumpDigitalOutput: DigitalOutput
+    private lateinit var pumpOnLedDigitalOutput: DigitalOutput
+    private lateinit var pumpOffLedDigitalOutput: DigitalOutput
+    private lateinit var moestuinLedDigitalOutput: DigitalOutput
+    private lateinit var gazonLedDigitalOutput: DigitalOutput
 
     private var buttonListener: ButtonListener? = null
     private val requiredDisplayLines: MutableMap<Int, String?> = mutableMapOf()
@@ -60,7 +62,7 @@ class HardwareImpl(val log: Log) : Hardware {
     }
 
     override fun displayLine(lineNr: Int, line: String) {
-        requiredDisplayLines.put(lineNr, line)
+        requiredDisplayLines[lineNr] = line
     }
 
     override fun registerSwitchListener(switchListener: ButtonListener) {
@@ -152,11 +154,11 @@ class HardwareImpl(val log: Log) : Hardware {
 
     private fun buildPi4j(): Context = Pi4J.newAutoContext()
 
-    fun startDisplayThread() = thread(start = true) {
+    private fun startDisplayThread() = thread(start = true) {
         displayThread()
     }
 
-    fun displayThread() {
+    private fun displayThread() {
         lcd.setDisplayBacklight(true)
         lcd.clearDisplay()
         while (true) {

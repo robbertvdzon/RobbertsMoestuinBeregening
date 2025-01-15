@@ -10,7 +10,6 @@ data class Timestamp (
     val hour: Int,
     val minute: Int,
 ){
-
     fun isAfterOrEqual(other: Timestamp): Boolean{
         val thisLocalDateTime = this.toLocalDateTime()
         val otherLocalDateTime = other.toLocalDateTime()
@@ -22,9 +21,11 @@ data class Timestamp (
         val otherLocalDateTime = other.toLocalDateTime()
         return thisLocalDateTime.isBefore(otherLocalDateTime) || thisLocalDateTime.isEqual(otherLocalDateTime)
     }
+
     fun toLocalDateTime(): LocalDateTime = LocalDateTime.of(year, month, day, hour, minute)
 
     fun plusDays(days: Long): Timestamp = fromTime(this.toLocalDateTime().plusDays(days))
+
     fun toEpochSecond() = toLocalDateTime().toEpochSecond(ZoneOffset.UTC)
 
     companion object{
@@ -38,7 +39,6 @@ data class Timestamp (
         }
 
         fun now(): Timestamp = fromTime(LocalDateTime.now())
-
 
         fun buildTimestamp(
             year: Int?,

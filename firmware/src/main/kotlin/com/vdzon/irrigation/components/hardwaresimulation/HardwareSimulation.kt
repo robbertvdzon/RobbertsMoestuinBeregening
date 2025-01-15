@@ -89,5 +89,4 @@ class HardwareSimulation(
         this.buttonListener = buttonListener
     }
 
-
 }
