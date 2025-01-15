@@ -8,6 +8,7 @@ import com.vdzon.irrigation.api.firebase.FirebaseProducer
 import com.vdzon.irrigation.api.hardware.Button
 import com.vdzon.irrigation.api.hardware.Hardware
 import com.vdzon.irrigation.api.hardware.Led
+import com.vdzon.irrigation.api.log.Log
 import com.vdzon.irrigation.api.model.*
 import com.vdzon.irrigation.api.model.view.ViewModel
 import java.io.File
@@ -19,9 +20,9 @@ import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 
 class ControllerImpl(
-    val hardware: Hardware,
-    val firebaseProducer: FirebaseProducer
-
+    private val hardware: Hardware,
+    private val firebaseProducer: FirebaseProducer,
+    private val log: Log
 ) : Controller {
     private var requestedState: State = State()
     private var schedules: Schedules = Schedules()
@@ -41,22 +42,22 @@ class ControllerImpl(
     override fun onButtonClick(button: Button) {
         when (button) {
             Button.MIN_5_MINUTES -> {
-                println("min 5")
+                log.logInfo("min 5")
                 addIrrigationTime(-5)
             }
 
             Button.PLUS_5_MINUTES -> {
-                println("plus 5")
+                log.logInfo("plus 5")
                 addIrrigationTime(5)
             }
 
             Button.MOESTUIN_AREA -> {
-                println("moestuin area")
+                log.logInfo("moestuin area")
                 changeIrrigationArea(IrrigationArea.MOESTUIN)
             }
 
             Button.GAZON_AREA -> {
-                println("gazon area")
+                log.logInfo("gazon area")
                 changeIrrigationArea(IrrigationArea.GAZON)
             }
         }

@@ -5,12 +5,14 @@ import com.google.cloud.firestore.DocumentSnapshot
 import com.google.cloud.firestore.FieldValue
 import com.google.cloud.firestore.Firestore
 import com.vdzon.irrigation.api.commandprocessor.CommandProcessor
+import com.vdzon.irrigation.api.log.Log
 import java.util.concurrent.Executors
 
 class FirebaseListener(
     private val collection: String,
     private val document: String,
-    private val commandProcessor: CommandProcessor
+    private val commandProcessor: CommandProcessor,
+    private val log: Log
 ) {
     private val executor = Executors.newSingleThreadExecutor()
 
@@ -18,13 +20,13 @@ class FirebaseListener(
         val documentRef = dbFirestore?.collection(collection)?.document(document)
         documentRef?.addSnapshotListener { snapshot, error ->
             if (error != null) {
-                println("Error listening to document: ${error.message}")
+                log.logInfo("Error listening to document: ${error.message}")
                 return@addSnapshotListener
             }
             if (snapshot != null && snapshot.exists()) {
                 processDocumentSnapshot(snapshot, documentRef)
             } else {
-                println("Document does not exists")
+                log.logInfo("Document does not exists")
             }
         }
     }

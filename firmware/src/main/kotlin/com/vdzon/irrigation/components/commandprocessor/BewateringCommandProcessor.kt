@@ -2,15 +2,18 @@ package com.vdzon.irrigation.components.commandprocessor
 
 import com.vdzon.irrigation.api.commandprocessor.CommandProcessor
 import com.vdzon.irrigation.api.commandprocessor.CommandProcessorListener
+import com.vdzon.irrigation.api.log.Log
 import com.vdzon.irrigation.api.model.IrrigationArea
 import com.vdzon.irrigation.api.model.Schedule
 import com.vdzon.irrigation.api.model.Timestamp
 
-class BewateringCommandProcessor : CommandProcessor {
+class BewateringCommandProcessor(
+    private val log: Log
+) : CommandProcessor {
     private var listener: CommandProcessorListener? = null
 
     override fun process(command: String) {
-        println("Processing command: $command")
+        log.logInfo("Processing command: $command")
         val count = command.toIntOrNull()
         if (count != null) {
             listener?.addIrrigationTime(count)
@@ -18,7 +21,7 @@ class BewateringCommandProcessor : CommandProcessor {
 
         if (command.startsWith("UPDATE_IRRIGATION_TIME")) {
             val parts = command.split(",")
-            println("UPDATE_IRRIGATION_TIME, with ${parts.size} parts : command=$command")
+            log.logInfo("UPDATE_IRRIGATION_TIME, with ${parts.size} parts : command=$command")
             if (parts.size == 2) {
                 val extraMinutes = parts[1].toIntOrNull()
                 if (extraMinutes != null) listener?.addIrrigationTime(extraMinutes)
@@ -27,7 +30,7 @@ class BewateringCommandProcessor : CommandProcessor {
 
         if (command.startsWith("CHANGE_AREA")) {
             val parts = command.split(",")
-            println("CHANGE_AREA, with ${parts.size} parts : command=$command")
+            log.logInfo("CHANGE_AREA, with ${parts.size} parts : command=$command")
             if (parts.size == 2) {
                 val area = IrrigationArea.valueOf(parts[1])
                 listener?.changeIrrigationArea(area)
@@ -35,13 +38,13 @@ class BewateringCommandProcessor : CommandProcessor {
         }
 
         if (command.startsWith("UPDATE_STATE")) {
-            println("UPDATE_STATE")
+            log.logInfo("UPDATE_STATE")
             listener?.updateState()
         }
 
         if (command.startsWith("REMOVE_SCHEDULE")) {
             val parts = command.split(",")
-            println("REMOVE_SCHEDULE, with ${parts.size} parts : command=$command")
+            log.logInfo("REMOVE_SCHEDULE, with ${parts.size} parts : command=$command")
             if (parts.size == 2) {
                 val id = parts[1]
                 listener?.removeSchedule(id)
@@ -50,7 +53,7 @@ class BewateringCommandProcessor : CommandProcessor {
 
         if (command.startsWith("ADD_SCHEDULE")) {
             val parts = command.split(",")
-            println("ADD_SCHEDULE, with ${parts.size} parts : command=$command")
+            log.logInfo("ADD_SCHEDULE, with ${parts.size} parts : command=$command")
             if (parts.size == 16) {
                 val id = parts[1]
                 val duration = parts[2].toInt()

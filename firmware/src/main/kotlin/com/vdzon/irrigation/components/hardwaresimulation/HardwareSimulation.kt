@@ -4,12 +4,15 @@ import com.vdzon.irrigation.api.hardware.Button
 import com.vdzon.irrigation.api.hardware.ButtonListener
 import com.vdzon.irrigation.api.hardware.Hardware
 import com.vdzon.irrigation.api.hardware.Led
+import com.vdzon.irrigation.api.log.Log
 import com.vdzon.irrigation.api.model.IrrigationArea
 import org.jline.terminal.TerminalBuilder
 import kotlin.concurrent.thread
 
 
-class HardwareSimulation : Hardware {
+class HardwareSimulation(
+    private val log: Log
+) : Hardware {
     private var buttonListener: ButtonListener? = null
     override fun start() {
         thread(start = true) {
@@ -19,7 +22,7 @@ class HardwareSimulation : Hardware {
 
     fun startHardware() {
         val terminal = TerminalBuilder.terminal()
-        println("q:-5  w:+5     e:moesttuin  r:gazon")
+        log.logInfo("q:-5  w:+5     e:moesttuin  r:gazon")
         while (true) {
             val key = terminal.reader().read().toChar()
             when (key) {
@@ -45,8 +48,8 @@ class HardwareSimulation : Hardware {
     private var lastPumpState: Boolean? = null
     override fun setPump(pumpState: Boolean) {
         when {
-            pumpState -> if (lastPumpState == false) println("PUMP ON")
-            !pumpState -> if (lastPumpState == true) println("PUMP OFF")
+            pumpState -> if (lastPumpState == false) log.logInfo("PUMP ON")
+            !pumpState -> if (lastPumpState == true) log.logInfo("PUMP OFF")
         }
         lastPumpState = pumpState
     }
@@ -54,8 +57,8 @@ class HardwareSimulation : Hardware {
     private var lastArea: IrrigationArea? = null
     override fun setArea(area: IrrigationArea) {
         when (area) {
-            IrrigationArea.MOESTUIN -> if (lastArea != IrrigationArea.MOESTUIN) println("SET AREA TO MOESTUIN")
-            IrrigationArea.GAZON -> if (lastArea != IrrigationArea.GAZON) println("SET AREA TO GAZON")
+            IrrigationArea.MOESTUIN -> if (lastArea != IrrigationArea.MOESTUIN) log.logInfo("SET AREA TO MOESTUIN")
+            IrrigationArea.GAZON -> if (lastArea != IrrigationArea.GAZON) log.logInfo("SET AREA TO GAZON")
         }
         lastArea = area
     }
@@ -63,7 +66,7 @@ class HardwareSimulation : Hardware {
     private val lastLedState: MutableMap<Led, Boolean> = mutableMapOf()
     override fun setLedState(led: Led, on: Boolean) {
         if (lastLedState[led] != on) {
-            println("LED $led : $on")
+            log.logInfo("LED $led : $on")
         }
         lastLedState[led] = on
     }
@@ -73,11 +76,11 @@ class HardwareSimulation : Hardware {
         if (lastLine[lineNr] != line) {
             lastLine[lineNr] = line
             if (lineNr != 1) {// do not display the screen update because of the alive char, so skip line 1
-                println("--------------------")
+                log.logInfo("--------------------")
                 (1..4).forEach { lineNr ->
-                    println(lastLine[lineNr])
+                    log.logInfo(lastLine[lineNr])
                 }
-                println("--------------------")
+                log.logInfo("--------------------")
             }
         }
     }

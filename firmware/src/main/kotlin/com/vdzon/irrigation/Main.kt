@@ -27,15 +27,15 @@ object Main {
     fun main(args: Array<String>) {
         val log = LogImpl()
         val development = System.getProperty("os.name").contains("OS X")
-        val hardware = if (development) HardwareSimulation() else HardwareImpl(log)
+        val hardware = if (development) HardwareSimulation(log) else HardwareImpl(log)
         val network: Network = NetworkImpl()
         val serviceAccountFile = if (development) SERVICE_ACCOUNT_FILE_OSX else SERVICE_ACCOUNT_FILE_LINUX
         val firebaseConfig = FirebaseConfig(serviceAccountFile, DATABASE_URL)
         val dbFirestore = firebaseConfig.initializeFirestore()
         val firebaseProducer = FirebaseProducerImpl(dbFirestore, COLLECTION, STATUS_DOCUMENT)
-        val controller: Controller = ControllerImpl(hardware, firebaseProducer)
-        val commandProcessor = BewateringCommandProcessor()
-        val firebaseListener = FirebaseListener(COLLECTION, COMMANDS_DOCUMENT, commandProcessor)
+        val controller: Controller = ControllerImpl(hardware, firebaseProducer, log)
+        val commandProcessor = BewateringCommandProcessor(log)
+        val firebaseListener = FirebaseListener(COLLECTION, COMMANDS_DOCUMENT, commandProcessor, log)
 
         firebaseListener.processCommands(dbFirestore)
         hardware.registerSwitchListener(controller)

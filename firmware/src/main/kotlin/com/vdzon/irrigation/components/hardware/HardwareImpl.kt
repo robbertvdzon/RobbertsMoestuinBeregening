@@ -5,7 +5,6 @@ import com.pi4j.context.Context
 import com.pi4j.io.gpio.digital.*
 import com.pi4j.plugin.gpiod.provider.gpio.digital.GpioDDigitalInputProvider
 import com.pi4j.plugin.gpiod.provider.gpio.digital.GpioDDigitalOutputProvider
-import com.pi4j.util.Console
 import com.vdzon.irrigation.api.hardware.Button
 import com.vdzon.irrigation.api.hardware.ButtonListener
 import com.vdzon.irrigation.api.hardware.Hardware
@@ -67,6 +66,7 @@ class HardwareImpl(val log: Log) : Hardware {
     override fun registerSwitchListener(switchListener: ButtonListener) {
         this.buttonListener = switchListener
     }
+
     override fun start() {
         thread(start = true) {
             startHardware()
@@ -76,43 +76,42 @@ class HardwareImpl(val log: Log) : Hardware {
     private fun startHardware() {
         pi4j = buildPi4j()
         Runtime.getRuntime().addShutdownHook(Thread {
-            println("Releasing GPIO resources...")
+            log.logInfo("Releasing GPIO resources...")
             pi4j.shutdown()
         })
         lcd = LcdDisplay(pi4j, 4, 20, log)
-        printInfo()
-
         val dout: GpioDDigitalOutputProvider = pi4j.dout()
         val din: GpioDDigitalInputProvider = pi4j.din()
+        val stateChangeLogger = DigitalStateChangeListener { var1 -> log.logInfo(var1.toString()) }
 
         pumpDigitalOutput = dout.create(PUMP_SOLENOID_PIN)
         pumpDigitalOutput.config().shutdownState(DigitalState.LOW)
-        pumpDigitalOutput.addListener(System.out::println)
+        pumpDigitalOutput.addListener(stateChangeLogger)
         pumpDigitalOutput.low()
 
         areaDigitalOutput = dout.create(AREA_SOLENOID_PIN)
         areaDigitalOutput.config().shutdownState(DigitalState.LOW)
-        areaDigitalOutput.addListener(System.out::println)
+        areaDigitalOutput.addListener(stateChangeLogger)
         areaDigitalOutput.low()
 
         pumpOnLedDigitalOutput = dout.create(PUMP_ON_LED_PIN)
         pumpOnLedDigitalOutput.config().shutdownState(DigitalState.HIGH)
-        pumpOnLedDigitalOutput.addListener(System.out::println)
+        pumpOnLedDigitalOutput.addListener(stateChangeLogger)
         pumpOnLedDigitalOutput.high()
 
         pumpOffLedDigitalOutput = dout.create(PUMP_OFF_LED_PIN)
         pumpOffLedDigitalOutput.config().shutdownState(DigitalState.HIGH)
-        pumpOffLedDigitalOutput.addListener(System.out::println)
+        pumpOffLedDigitalOutput.addListener(stateChangeLogger)
         pumpOffLedDigitalOutput.high()
 
         moestuinLedDigitalOutput = dout.create(GROENTETUIN_LED_PIN)
         moestuinLedDigitalOutput.config().shutdownState(DigitalState.HIGH)
-        moestuinLedDigitalOutput.addListener(System.out::println)
+        moestuinLedDigitalOutput.addListener(stateChangeLogger)
         moestuinLedDigitalOutput.high()
 
         gazonLedDigitalOutput = dout.create(GAZON_LED_PIN)
         gazonLedDigitalOutput.config().shutdownState(DigitalState.HIGH)
-        gazonLedDigitalOutput.addListener(System.out::println)
+        gazonLedDigitalOutput.addListener(stateChangeLogger)
         gazonLedDigitalOutput.high()
 
         createButton("moestuin_button", MOESTUIN_BUTTON_PIN, din) {
@@ -152,15 +151,6 @@ class HardwareImpl(val log: Log) : Hardware {
     }
 
     private fun buildPi4j(): Context = Pi4J.newAutoContext()
-
-    private fun printInfo() {
-        val console = Console()
-        console.title("<-- The Pi4J Project -->", "Minimal Example project")
-        PrintInfo.printLoadedPlatforms(console, pi4j)
-        PrintInfo.printDefaultPlatform(console, pi4j)
-        PrintInfo.printProviders(console, pi4j)
-        PrintInfo.printRegistry(console, pi4j)
-    }
 
     fun startDisplayThread() = thread(start = true) {
         displayThread()
