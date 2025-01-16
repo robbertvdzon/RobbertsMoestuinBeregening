@@ -1,8 +1,6 @@
 package com.vdzon.irrigation.components.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.vdzon.irrigation.api.controller.Controller
 import com.vdzon.irrigation.api.firebase.FirebaseProducer
 import com.vdzon.irrigation.api.hardware.Button
@@ -22,15 +20,14 @@ import kotlin.concurrent.thread
 class ControllerImpl(
     private val hardware: Hardware,
     private val firebaseProducer: FirebaseProducer,
-    private val log: Log
+    private val log: Log,
+    private val objectMapper: ObjectMapper
 ) : Controller {
     private var requestedState: State = State()
     private var schedules: Schedules = Schedules()
     private var currentIP: String = "Unknown"
-    private val objectMapper: ObjectMapper = jacksonObjectMapper()
 
     override fun start() {
-        objectMapper.registerModule(JavaTimeModule())
         requestedState = loadState()
         schedules = loadSchedules()
         thread(start = true) {
@@ -66,7 +63,7 @@ class ControllerImpl(
     override fun addIrrigationTime(minutes: Int) {
         val now = LocalDateTime.now()
         // When current closetime is in the past, then first change it to now
-        if (requestedState.closeTime.isBefore(now)){
+        if (requestedState.closeTime.isBefore(now)) {
             requestedState.closeTime = now
         }
         requestedState.closeTime = requestedState.closeTime.plusMinutes(minutes.toLong())
