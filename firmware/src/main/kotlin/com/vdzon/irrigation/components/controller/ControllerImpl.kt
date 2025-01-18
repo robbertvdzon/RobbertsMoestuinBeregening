@@ -98,11 +98,13 @@ class ControllerImpl(
     }
 
     fun saveSchedule() {
+        log.logInfo("Update schedules.json")
         val file = File("schedules.json")
         objectMapper.writeValue(file, schedules)
     }
 
     fun saveState() {
+        log.logInfo("Update state.json")
         val file = File("state.json")
         objectMapper.writeValue(file, requestedState)
     }
@@ -176,8 +178,10 @@ class ControllerImpl(
             it.endSchedule != null &&
                     it.endSchedule.isAfterOrEqual(now)
         }
-        schedules.schedules.removeAll(schedulesToRemove)
-        saveSchedule()
+        if (schedulesToRemove.isNotEmpty()) {
+            schedules.schedules.removeAll(schedulesToRemove)
+            saveSchedule()
+        }
     }
 
     private fun ensurePumpState() {

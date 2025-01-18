@@ -18,7 +18,7 @@ import com.vdzon.irrigation.components.network.NetworkImpl
 object Main {
 
     private const val SERVICE_ACCOUNT_FILE_OSX =
-        "/Users/robbert/tuinbewatering-firebase-adminsdk-mdooy-b394f2553c.json" // change to robbertvdzon op eigen mac
+        "/Users/robbertvdzon/tuinbewatering-firebase-adminsdk-mdooy-b394f2553c.json" // change to robbertvdzon op eigen mac
     private const val SERVICE_ACCOUNT_FILE_LINUX =
         "/home/robbert/tuinbewatering-firebase-adminsdk-mdooy-b394f2553c.json"
     private const val DATABASE_URL = "https://tuinbewatering.firebaseio.com"
