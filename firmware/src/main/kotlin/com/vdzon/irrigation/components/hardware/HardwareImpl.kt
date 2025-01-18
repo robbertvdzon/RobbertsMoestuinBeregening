@@ -196,8 +196,8 @@ class HardwareImpl(
         private const val MOESTUIN_BUTTON_PIN = 27
         private const val GAZON_BUTTON_PIN = 22
 
-        private const val PUMP_ON_LED_PIN = 10
-        private const val PUMP_OFF_LED_PIN = 13
+        private const val PUMP_ON_LED_PIN = 13
+        private const val PUMP_OFF_LED_PIN = 10
         private const val GROENTETUIN_LED_PIN = 11
         private const val GAZON_LED_PIN = 6
 
