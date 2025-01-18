@@ -201,10 +201,10 @@ class ControllerImpl(
 
     private fun updateDisplay() {
         val aliveChar = getAliveChar()
-        hardware.displayLine(1, "IP   : $currentIP $aliveChar")
-        hardware.displayLine(2, "Area : ${requestedState.irrigationArea.name}")
-        hardware.displayLine(3, "Next : ${getNextSchedule()}")
-        hardware.displayLine(4, "Timer: ${getTimerTime()}")
+        hardware.displayLine(1, "$currentIP $aliveChar")
+        hardware.displayLine(2, "${requestedState.irrigationArea.name}")
+        hardware.displayLine(3, "${getNextSchedule()}")
+        hardware.displayLine(4, "${getTimerTime()}")
     }
 
     private fun getNextSchedule(): String {

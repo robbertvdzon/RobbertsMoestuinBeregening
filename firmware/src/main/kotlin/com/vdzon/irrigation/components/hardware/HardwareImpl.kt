@@ -117,16 +117,16 @@ class HardwareImpl(
         gazonLedDigitalOutput.high()
 
         createButton("moestuin_button", MOESTUIN_BUTTON_PIN, din) {
-            buttonListener?.onButtonClick(Button.MOESTUIN_AREA)
+            if (it.state() === DigitalState.LOW) buttonListener?.onButtonClick(Button.MOESTUIN_AREA)
         }
         createButton("gazon_button", GAZON_BUTTON_PIN, din) {
-            buttonListener?.onButtonClick(Button.GAZON_AREA)
+            if (it.state() === DigitalState.LOW) buttonListener?.onButtonClick(Button.GAZON_AREA)
         }
         createButton("add_5_button", PLUS_5_MINUTES_BUTTON_PIN, din) {
-            buttonListener?.onButtonClick(Button.PLUS_5_MINUTES)
+            if (it.state() === DigitalState.LOW) buttonListener?.onButtonClick(Button.PLUS_5_MINUTES)
         }
         createButton("min_5_button", MIN_5_MINUTES_BUTTON_PIN, din) {
-            buttonListener?.onButtonClick(Button.MIN_5_MINUTES)
+            if (it.state() === DigitalState.LOW) buttonListener?.onButtonClick(Button.MIN_5_MINUTES)
         }
 
         startDisplayThread()
@@ -191,15 +191,15 @@ class HardwareImpl(
     }
 
     companion object {
-        private const val MIN_5_MINUTES_BUTTON_PIN = 4
-        private const val PLUS_5_MINUTES_BUTTON_PIN = 17
+        private const val MIN_5_MINUTES_BUTTON_PIN = 17
+        private const val PLUS_5_MINUTES_BUTTON_PIN = 4
         private const val MOESTUIN_BUTTON_PIN = 27
         private const val GAZON_BUTTON_PIN = 22
 
         private const val PUMP_ON_LED_PIN = 10
-        private const val PUMP_OFF_LED_PIN = 6
+        private const val PUMP_OFF_LED_PIN = 13
         private const val GROENTETUIN_LED_PIN = 11
-        private const val GAZON_LED_PIN = 13
+        private const val GAZON_LED_PIN = 6
 
         private const val PUMP_SOLENOID_PIN = 19
         private const val AREA_SOLENOID_PIN = 26
