@@ -193,13 +193,13 @@ class HardwareImpl(
     companion object {
         private const val MIN_5_MINUTES_BUTTON_PIN = 17
         private const val PLUS_5_MINUTES_BUTTON_PIN = 4
-        private const val MOESTUIN_BUTTON_PIN = 27
-        private const val GAZON_BUTTON_PIN = 22
+        private const val MOESTUIN_BUTTON_PIN = 22
+        private const val GAZON_BUTTON_PIN = 27
 
         private const val PUMP_ON_LED_PIN = 13
         private const val PUMP_OFF_LED_PIN = 10
-        private const val GROENTETUIN_LED_PIN = 11
-        private const val GAZON_LED_PIN = 6
+        private const val GROENTETUIN_LED_PIN = 6
+        private const val GAZON_LED_PIN = 11
 
         private const val PUMP_SOLENOID_PIN = 19
         private const val AREA_SOLENOID_PIN = 26
