@@ -65,14 +65,16 @@ class BewateringCommandProcessor(
                 val startDay = parts[8].toInt()
                 val startHour = parts[9].toInt()
                 val startMinute = parts[10].toInt()
-                val endYear = parts[11].toIntOrNull()
-                val endMonth = parts[12].toIntOrNull()
-                val endDay = parts[13].toIntOrNull()
-                val endHour = parts[14].toIntOrNull()
-                val endMinute = parts[15].toIntOrNull()
+                val startSecond = parts[11].toInt()
+                val endYear = parts[12].toIntOrNull()
+                val endMonth = parts[13].toIntOrNull()
+                val endDay = parts[14].toIntOrNull()
+                val endHour = parts[15].toIntOrNull()
+                val endMinute = parts[16].toIntOrNull()
+                val endSecond = parts[17].toIntOrNull()
                 val startSchedule: Timestamp =
-                    Timestamp.buildTimestamp(startYear, startMonth, startDay, startHour, startMinute)!!
-                val endSchedule: Timestamp? = Timestamp.buildTimestamp(endYear, endMonth, endDay, endHour, endMinute)
+                    Timestamp.buildTimestamp(startYear, startMonth, startDay, startHour, startMinute, startSecond)!!
+                val endSchedule: Timestamp? = Timestamp.buildTimestamp(endYear, endMonth, endDay, endHour, endMinute, endSecond)
                 val schedule = Schedule(
                     id,
                     startSchedule,

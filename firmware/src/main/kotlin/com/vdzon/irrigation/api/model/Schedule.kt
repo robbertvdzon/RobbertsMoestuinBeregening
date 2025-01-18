@@ -25,7 +25,8 @@ data class Schedule (
             month = from.month,
             day = from.day,
             hour = startSchedule.hour,
-            minute = startSchedule.minute
+            minute = startSchedule.minute,
+            second = startSchedule.second,
         )
         while (true){
             val startDate = startSchedule.toLocalDateTime().toLocalDate()

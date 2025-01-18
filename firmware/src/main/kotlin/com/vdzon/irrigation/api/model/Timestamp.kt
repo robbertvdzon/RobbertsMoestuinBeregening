@@ -9,6 +9,7 @@ data class Timestamp (
     val day: Int,
     val hour: Int,
     val minute: Int,
+    val second: Int,
 ){
     fun isAfterOrEqual(other: Timestamp): Boolean{
         val thisLocalDateTime = this.toLocalDateTime()
@@ -35,7 +36,8 @@ data class Timestamp (
             val day = dateTime.dayOfMonth
             val hour = dateTime.hour
             val minute = dateTime.minute
-            return Timestamp(year, month, day, hour, minute)
+            val second = dateTime.second
+            return Timestamp(year, month, day, hour, minute, second)
         }
 
         fun now(): Timestamp = fromTime(LocalDateTime.now())
@@ -45,14 +47,16 @@ data class Timestamp (
             month: Int?,
             day: Int?,
             hour: Int?,
-            minute: Int?
+            minute: Int?,
+            second: Int?,
         ): Timestamp? {
             if (year==null) return null
             if (month==null) return null
             if (day==null) return null
             if (hour==null) return null
             if (minute==null) return null
-            return Timestamp(year, month, day, hour, minute)
+            if (second==null) return null
+            return Timestamp(year, month, day, hour, minute, second)
         }
     }
 }
