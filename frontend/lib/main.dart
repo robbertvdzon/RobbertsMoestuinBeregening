@@ -39,6 +39,7 @@ class ViewModel {
   Map<String, dynamic> toJson() => _$ViewModelToJson(this);
 }
 
+
 // Enum for PumpStatus
 enum PumpStatus { OPEN, CLOSE }
 
