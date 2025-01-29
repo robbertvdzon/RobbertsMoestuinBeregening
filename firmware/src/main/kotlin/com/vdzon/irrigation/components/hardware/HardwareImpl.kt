@@ -20,31 +20,44 @@ class HardwareImpl(
 ) : Hardware {
     private lateinit var pi4j: Context
     private lateinit var lcd: LcdDisplay
+    private lateinit var areaDigitalOutput: DigitalOutput
+    private lateinit var pumpDigitalOutput: DigitalOutput
+    private lateinit var pumpOnLedDigitalOutput: DigitalOutput
+    private lateinit var pumpOffLedDigitalOutput: DigitalOutput
+    private lateinit var moestuinLedDigitalOutput: DigitalOutput
+    private lateinit var gazonLedDigitalOutput: DigitalOutput
 
-    private val digitalOutputs: MutableMap<DIGITAL_OUTPUT, DigitalOutputWithState> = mutableMapOf()
     private var buttonListener: ButtonListener? = null
     private val requiredDisplayLines: MutableMap<Int, String?> = mutableMapOf()
     private val currentDisplayLines: MutableMap<Int, String?> = mutableMapOf()
 
     override fun setPump(on: Boolean) {
-        val out = digitalOutputs[DIGITAL_OUTPUT.PUMP] ?: return
-        out.requiredValue = on
+        when {
+            on -> if (!pumpDigitalOutput.isHigh) pumpDigitalOutput.high()
+            !on -> if (!pumpDigitalOutput.isLow) pumpDigitalOutput.low()
+        }
     }
 
     override fun setArea(area: IrrigationArea) {
-        val out = digitalOutputs[DIGITAL_OUTPUT.AREA] ?: return
-        out.requiredValue = area == IrrigationArea.MOESTUIN
+        when (area) {
+            IrrigationArea.MOESTUIN -> if (!areaDigitalOutput.isHigh) areaDigitalOutput.high()
+            IrrigationArea.GAZON -> if (!areaDigitalOutput.isLow) areaDigitalOutput.low()
+        }
     }
 
     override fun setLedState(led: Led, on: Boolean) {
-        val out = when (led) {
-            Led.PUMP_OFF -> digitalOutputs[DIGITAL_OUTPUT.PUMP_OFF_LED]
-            Led.PUMP_ON -> digitalOutputs[DIGITAL_OUTPUT.PUMP_ON_LED]
-            Led.MOESTUIN_AREA -> digitalOutputs[DIGITAL_OUTPUT.MOESTUIN_LED]
-            Led.GAZON_AREA -> digitalOutputs[DIGITAL_OUTPUT.GAZON_LED]
-        }
-        if (out != null) {
-            out.requiredValue = on
+        when {
+            led == Led.PUMP_OFF && on -> if (!pumpOffLedDigitalOutput.isHigh) pumpOffLedDigitalOutput.high()
+            led == Led.PUMP_OFF && !on -> if (!pumpOffLedDigitalOutput.isLow) pumpOffLedDigitalOutput.low()
+
+            led == Led.PUMP_ON && on -> if (!pumpOnLedDigitalOutput.isHigh) pumpOnLedDigitalOutput.high()
+            led == Led.PUMP_ON && !on -> if (!pumpOnLedDigitalOutput.isLow) pumpOnLedDigitalOutput.low()
+
+            led == Led.MOESTUIN_AREA && on -> if (!moestuinLedDigitalOutput.isHigh) moestuinLedDigitalOutput.high()
+            led == Led.MOESTUIN_AREA && !on -> if (!moestuinLedDigitalOutput.isLow) moestuinLedDigitalOutput.low()
+
+            led == Led.GAZON_AREA && on -> if (!gazonLedDigitalOutput.isHigh) gazonLedDigitalOutput.high()
+            led == Led.GAZON_AREA && !on -> if (!gazonLedDigitalOutput.isLow) gazonLedDigitalOutput.low()
         }
     }
 
@@ -73,53 +86,35 @@ class HardwareImpl(
         val din: GpioDDigitalInputProvider = pi4j.din()
         val stateChangeLogger = DigitalStateChangeListener { var1 -> log.logInfo(var1.toString()) }
 
-        val pumpDigitalOutput: DigitalOutput = dout.create(PUMP_SOLENOID_PIN)
+        pumpDigitalOutput = dout.create(PUMP_SOLENOID_PIN)
         pumpDigitalOutput.config().shutdownState(DigitalState.LOW)
         pumpDigitalOutput.addListener(stateChangeLogger)
-        digitalOutputs.put(
-            DIGITAL_OUTPUT.PUMP,
-            DigitalOutputWithState(pumpDigitalOutput, false, true)
-        )
+        pumpDigitalOutput.low()
 
-        val areaDigitalOutput: DigitalOutput = dout.create(AREA_SOLENOID_PIN)
+        areaDigitalOutput = dout.create(AREA_SOLENOID_PIN)
         areaDigitalOutput.config().shutdownState(DigitalState.LOW)
         areaDigitalOutput.addListener(stateChangeLogger)
-        digitalOutputs.put(
-            DIGITAL_OUTPUT.AREA,
-            DigitalOutputWithState(areaDigitalOutput, false, true)
-        )
+        areaDigitalOutput.low()
 
-        val pumpOnLedDigitalOutput: DigitalOutput = dout.create(PUMP_ON_LED_PIN)
+        pumpOnLedDigitalOutput = dout.create(PUMP_ON_LED_PIN)
         pumpOnLedDigitalOutput.config().shutdownState(DigitalState.HIGH)
         pumpOnLedDigitalOutput.addListener(stateChangeLogger)
-        digitalOutputs.put(
-            DIGITAL_OUTPUT.PUMP_ON_LED,
-            DigitalOutputWithState(pumpOnLedDigitalOutput, true, true)
-        )
+        pumpOnLedDigitalOutput.high()
 
-        val pumpOffLedDigitalOutput: DigitalOutput = dout.create(PUMP_OFF_LED_PIN)
+        pumpOffLedDigitalOutput = dout.create(PUMP_OFF_LED_PIN)
         pumpOffLedDigitalOutput.config().shutdownState(DigitalState.HIGH)
         pumpOffLedDigitalOutput.addListener(stateChangeLogger)
-        digitalOutputs.put(
-            DIGITAL_OUTPUT.PUMP_OFF_LED,
-            DigitalOutputWithState(pumpOffLedDigitalOutput, true, true)
-        )
+        pumpOffLedDigitalOutput.high()
 
-        val moestuinLedDigitalOutput: DigitalOutput = dout.create(GROENTETUIN_LED_PIN)
+        moestuinLedDigitalOutput = dout.create(GROENTETUIN_LED_PIN)
         moestuinLedDigitalOutput.config().shutdownState(DigitalState.HIGH)
         moestuinLedDigitalOutput.addListener(stateChangeLogger)
-        digitalOutputs.put(
-            DIGITAL_OUTPUT.MOESTUIN_LED,
-            DigitalOutputWithState(moestuinLedDigitalOutput, true, true)
-        )
+        moestuinLedDigitalOutput.high()
 
-        val gazonLedDigitalOutput: DigitalOutput = dout.create(GAZON_LED_PIN)
+        gazonLedDigitalOutput = dout.create(GAZON_LED_PIN)
         gazonLedDigitalOutput.config().shutdownState(DigitalState.HIGH)
         gazonLedDigitalOutput.addListener(stateChangeLogger)
-        digitalOutputs.put(
-            DIGITAL_OUTPUT.GAZON_LED,
-            DigitalOutputWithState(gazonLedDigitalOutput, true, true)
-        )
+        gazonLedDigitalOutput.high()
 
         createButton("moestuin_button", MOESTUIN_BUTTON_PIN, din) {
             if (it.state() === DigitalState.LOW) buttonListener?.onButtonClick(Button.MOESTUIN_AREA)
@@ -134,7 +129,7 @@ class HardwareImpl(
             if (it.state() === DigitalState.LOW) buttonListener?.onButtonClick(Button.MIN_5_MINUTES)
         }
 
-        startDisplayAndPinOutThread()
+        startDisplayThread()
     }
 
     private fun createButton(
@@ -159,17 +154,16 @@ class HardwareImpl(
 
     private fun buildPi4j(): Context = Pi4J.newAutoContext()
 
-    private fun startDisplayAndPinOutThread() = thread(start = true) {
-        displayAndPinOutThread()
+    private fun startDisplayThread() = thread(start = true) {
+        displayThread()
     }
 
-    private fun displayAndPinOutThread() {
+    private fun displayThread() {
         lcd.setDisplayBacklight(true)
         lcd.clearDisplay()
         while (true) {
             try {
                 updateDisplay()
-                updatePinOut()
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -185,16 +179,6 @@ class HardwareImpl(
                 val line = requiredLine ?: ""
                 lcd.displayText(line, lineNr)
                 currentDisplayLines[lineNr] = requiredLine
-            }
-        }
-    }
-
-    private fun updatePinOut() {
-        // check all pin's if they have the required state
-        digitalOutputs.values.forEach {
-            if (it.currentValue != it.requiredValue) {
-                it.digitalOutput.setState(it.requiredValue)
-                it.currentValue = it.digitalOutput.isHigh
             }
         }
     }
@@ -220,19 +204,6 @@ class HardwareImpl(
         private const val PUMP_SOLENOID_PIN = 19
         private const val AREA_SOLENOID_PIN = 26
     }
+
 }
 
-private data class DigitalOutputWithState(
-    var digitalOutput: DigitalOutput,
-    var requiredValue: Boolean,
-    var currentValue: Boolean?,
-)
-
-private enum class DIGITAL_OUTPUT {
-    AREA,
-    PUMP,
-    PUMP_ON_LED,
-    PUMP_OFF_LED,
-    MOESTUIN_LED,
-    GAZON_LED
-}
