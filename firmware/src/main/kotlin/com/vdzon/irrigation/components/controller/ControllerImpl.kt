@@ -17,6 +17,8 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 
+const val DISABLE_PUMP_TIME_WHILE_CHANGING_AREA = 20L // when the area was changed, disable the pump for 20 seconds
+
 class ControllerImpl(
     private val hardware: Hardware,
     private val firebaseProducer: FirebaseProducer,
@@ -26,6 +28,8 @@ class ControllerImpl(
     private var requestedState: State = State()
     private var schedules: Schedules = Schedules()
     private var currentIP: String = "Unknown"
+    private var disablePumpUntil = LocalDateTime.now() // when the area was changed, disable the pump for 20 seconds
+    private var lastKnownIrrigationArea: IrrigationArea? = null
 
     override fun start() {
         requestedState = loadState()
@@ -139,7 +143,7 @@ class ControllerImpl(
             ensureIrrigationAreState()
             updateDisplay()
             updateFirebase()
-            sleep()
+            sleep(millis = 100)
         }
     }
 
@@ -185,28 +189,45 @@ class ControllerImpl(
     }
 
     private fun ensurePumpState() {
-        val closeTimeInFuture = requestedState.closeTime.isAfter(LocalDateTime.now())
-        if (closeTimeInFuture) {
-            hardware.setPump(true)
-            hardware.setLedState(Led.PUMP_ON, true)
-            hardware.setLedState(Led.PUMP_OFF, false)
-        } else {
+        val pumpDisabled = LocalDateTime.now().isBefore(disablePumpUntil)
+        if (pumpDisabled) {
+            // disable the pump, and flash the lights
             hardware.setPump(false)
-            hardware.setLedState(Led.PUMP_OFF, true)
-            hardware.setLedState(Led.PUMP_ON, false)
+            val flashToggle = LocalDateTime.now().second.mod(2) == 0
+            hardware.setLedState(Led.PUMP_ON, flashToggle)
+            hardware.setLedState(Led.PUMP_OFF, !flashToggle)
+        } else {
+            // pump is not disabled, check what state is needed
+            val closeTimeInFuture = requestedState.closeTime.isAfter(LocalDateTime.now())
+            if (closeTimeInFuture) {
+                hardware.setPump(true)
+                hardware.setLedState(Led.PUMP_ON, true)
+                hardware.setLedState(Led.PUMP_OFF, false)
+            } else {
+                hardware.setPump(false)
+                hardware.setLedState(Led.PUMP_OFF, true)
+                hardware.setLedState(Led.PUMP_ON, false)
+            }
         }
     }
 
+
     private fun ensureIrrigationAreState() {
+        if (lastKnownIrrigationArea != requestedState.irrigationArea) {
+            disablePumpUntil = LocalDateTime.now().plusSeconds(DISABLE_PUMP_TIME_WHILE_CHANGING_AREA)
+        }
         hardware.setArea(requestedState.irrigationArea)
         hardware.setLedState(Led.GAZON_AREA, requestedState.irrigationArea == IrrigationArea.GAZON)
         hardware.setLedState(Led.MOESTUIN_AREA, requestedState.irrigationArea == IrrigationArea.MOESTUIN)
+        lastKnownIrrigationArea = requestedState.irrigationArea
     }
 
     private fun updateDisplay() {
+        val pumpDisabled = LocalDateTime.now().isBefore(disablePumpUntil)
+        val changeAreText = if (pumpDisabled) "(WISSEL)" else ""
         val aliveChar = getAliveChar()
         hardware.displayLine(1, "$currentIP $aliveChar")
-        hardware.displayLine(2, "${requestedState.irrigationArea.name}")
+        hardware.displayLine(2, "${requestedState.irrigationArea.name} $changeAreText")
         hardware.displayLine(3, "${getNextSchedule()}")
         hardware.displayLine(4, "${getTimerTime()}")
     }
