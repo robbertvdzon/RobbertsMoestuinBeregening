@@ -11,9 +11,6 @@ import 'dart:async';
 import 'schedules.dart';
 import 'model.dart';
 
-String myData = "Test";
-var _uuid = Uuid();
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -72,7 +69,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
 
   // late Timer _timer;
-  ViewModel? viewModel = null;
+  late ViewModel? viewModel = null;
   // String _timeLeft = "";
   late Stream<String> _timeStream;
   late Stream<ViewModel?> _schedulesStream; // eigenlijk niet alleen schedules dus!
@@ -276,73 +273,13 @@ class _MyHomePageState extends State<MyHomePage> {
                       // Navigeren naar SecondPage
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const Schedules()),
+                        MaterialPageRoute(builder: (context) =>  Schedules(title: 'Schedules', viewModel: viewModel,)),
                       );
                     },
                     child: Text('Schedules'),
                   ),
                 ],
               ),
-
-
-
-
-
-
-
-
-              StreamBuilder<ViewModel?>(
-                stream: _schedulesStream,
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return CircularProgressIndicator();
-                  }
-                  List<EnrichedSchedule> schedules = snapshot.data!.schedules;
-
-
-                  return ListView.builder(
-                    shrinkWrap: true, // Past de hoogte aan de inhoud aan
-                    itemCount: schedules.length,
-                    itemBuilder: (context, index) {
-                      EnrichedSchedule schedule = schedules[index];
-                      String id = schedule.schedule.id.toString();
-                      String hour = schedule.schedule.scheduledTime.hour.toString();
-                      String minute = schedule.schedule.scheduledTime.minute.toString();
-                      String area = schedule.schedule.erea.name;
-                      String showertime = schedule.schedule.duration.toString();
-                      String interval = schedule.schedule.daysInterval.toString();
-
-                      String nextDay = schedule.nextRun?.day.toString() ?? "";
-                      String nextMonth = schedule.nextRun?.month.toString() ?? "";
-                      String nextYear = schedule.nextRun?.year.toString() ?? "";
-                      String nextHour = schedule.nextRun?.hour.toString() ?? "";
-                      String nextMinute = schedule.nextRun?.minute.toString() ?? "";
-
-                      String scheduleStr = "$id : at $hour:$minute $area, every $interval day(s) for $showertime minutes" ;
-                      String nextRun = "Next run: $nextDay/$nextMonth/$nextYear $nextHour:$nextMinute" ;
-                      String textnaam = "$scheduleStr\n$nextRun" ;
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // Tekstelement met de naam van de schedule
-                          Text(textnaam, style: TextStyle(fontSize: 16)),
-
-                          // Knop om de schedule te verwijderen
-                          ElevatedButton(
-                            onPressed: () {
-                              //_deleteSchedule(schedule);
-                            },
-                            child: Text('Verwijder'),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
-              ),
-
-
 
 
             ],
