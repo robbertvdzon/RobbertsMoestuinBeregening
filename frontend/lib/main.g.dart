@@ -57,6 +57,30 @@ Map<String, dynamic> _$TimestampToJson(Timestamp instance) => <String, dynamic>{
       'second': instance.second,
     };
 
+ScheduleTime _$ScheduleTimeFromJson(Map<String, dynamic> json) => ScheduleTime(
+      hour: (json['hour'] as num).toInt(),
+      minute: (json['minute'] as num).toInt(),
+    );
+
+Map<String, dynamic> _$ScheduleTimeToJson(ScheduleTime instance) =>
+    <String, dynamic>{
+      'hour': instance.hour,
+      'minute': instance.minute,
+    };
+
+ScheduleDate _$ScheduleDateFromJson(Map<String, dynamic> json) => ScheduleDate(
+      year: (json['year'] as num).toInt(),
+      month: (json['month'] as num).toInt(),
+      day: (json['day'] as num).toInt(),
+    );
+
+Map<String, dynamic> _$ScheduleDateToJson(ScheduleDate instance) =>
+    <String, dynamic>{
+      'year': instance.year,
+      'month': instance.month,
+      'day': instance.day,
+    };
+
 EnrichedSchedule _$EnrichedScheduleFromJson(Map<String, dynamic> json) =>
     EnrichedSchedule(
       schedule: Schedule.fromJson(json['schedule'] as Map<String, dynamic>),
@@ -73,11 +97,13 @@ Map<String, dynamic> _$EnrichedScheduleToJson(EnrichedSchedule instance) =>
 
 Schedule _$ScheduleFromJson(Map<String, dynamic> json) => Schedule(
       id: json['id'] as String,
-      startSchedule:
-          Timestamp.fromJson(json['startSchedule'] as Map<String, dynamic>),
-      endSchedule: json['endSchedule'] == null
+      startDate:
+          ScheduleDate.fromJson(json['startDate'] as Map<String, dynamic>),
+      endDate: json['endDate'] == null
           ? null
-          : Timestamp.fromJson(json['endSchedule'] as Map<String, dynamic>),
+          : ScheduleDate.fromJson(json['endDate'] as Map<String, dynamic>),
+      scheduledTime:
+          ScheduleTime.fromJson(json['scheduledTime'] as Map<String, dynamic>),
       duration: (json['duration'] as num).toInt(),
       daysInterval: (json['daysInterval'] as num).toInt(),
       erea: $enumDecode(_$IrrigationAreaEnumMap, json['erea']),
@@ -86,8 +112,9 @@ Schedule _$ScheduleFromJson(Map<String, dynamic> json) => Schedule(
 
 Map<String, dynamic> _$ScheduleToJson(Schedule instance) => <String, dynamic>{
       'id': instance.id,
-      'startSchedule': instance.startSchedule.toJson(),
-      'endSchedule': instance.endSchedule?.toJson(),
+      'startDate': instance.startDate.toJson(),
+      'endDate': instance.endDate?.toJson(),
+      'scheduledTime': instance.scheduledTime.toJson(),
       'duration': instance.duration,
       'daysInterval': instance.daysInterval,
       'erea': _$IrrigationAreaEnumMap[instance.erea]!,

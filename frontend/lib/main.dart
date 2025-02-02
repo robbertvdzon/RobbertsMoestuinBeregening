@@ -8,6 +8,7 @@ import 'dart:html' as html;
 import 'package:json_annotation/json_annotation.dart';
 import 'dart:convert';
 import 'dart:async';
+import 'schedules.dart';
 
 part 'main.g.dart';
 
@@ -70,6 +71,40 @@ class Timestamp {
   Map<String, dynamic> toJson() => _$TimestampToJson(this);
 }
 
+// Timestamp class
+@JsonSerializable()
+class ScheduleTime {
+  final int hour;
+  final int minute;
+
+  ScheduleTime({
+    required this.hour,
+    required this.minute,
+  });
+
+  factory ScheduleTime.fromJson(Map<String, dynamic> json) => _$ScheduleTimeFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ScheduleTimeToJson(this);
+}
+
+// ScheduleDate class
+@JsonSerializable()
+class ScheduleDate {
+  final int year;
+  final int month;
+  final int day;
+
+  ScheduleDate({
+    required this.year,
+    required this.month,
+    required this.day,
+  });
+
+  factory ScheduleDate.fromJson(Map<String, dynamic> json) => _$ScheduleDateFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ScheduleDateToJson(this);
+}
+
 // EnrichedSchedule class
 @JsonSerializable(explicitToJson: true)
 class EnrichedSchedule {
@@ -90,8 +125,9 @@ class EnrichedSchedule {
 @JsonSerializable(explicitToJson: true)
 class Schedule {
   final String id;
-  final Timestamp startSchedule;
-  final Timestamp? endSchedule;
+  final ScheduleDate startDate;
+  final ScheduleDate? endDate;
+  final ScheduleTime scheduledTime;
   final int duration;
   final int daysInterval;
   final IrrigationArea erea;
@@ -99,8 +135,9 @@ class Schedule {
 
   Schedule({
     required this.id,
-    required this.startSchedule,
-    this.endSchedule,
+    required this.startDate,
+    this.endDate,
+    required this.scheduledTime,
     required this.duration,
     required this.daysInterval,
     required this.erea,
@@ -177,6 +214,7 @@ class _MyHomePageState extends State<MyHomePage> {
   ViewModel? viewModel = null;
   // String _timeLeft = "";
   late Stream<String> _timeStream;
+  late Stream<ViewModel?> _schedulesStream; // eigenlijk niet alleen schedules dus!
 
   String getTimeLeft(){
         String timeLeft = "Unknown";
@@ -198,34 +236,17 @@ class _MyHomePageState extends State<MyHomePage> {
 
   }
 
+
   @override
   void initState() {
     super.initState();
     _timeStream = Stream.periodic(Duration(seconds: 1), (_) =>
         getTimeLeft()
     );
+    _schedulesStream = Stream.periodic(Duration(seconds: 1), (_) =>
+        viewModel
+    );
     _requestBackendUpdates();
-    //
-    // _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-    //   setState(() {
-    //     String timeLeft = "Unknown";
-    //     final viewModelCopy = viewModel;
-    //     if (viewModelCopy!=null) {
-    //       if (viewModelCopy.pumpStatus == PumpStatus.CLOSE) timeLeft = "Closed";
-    //       if (viewModelCopy.pumpStatus == PumpStatus.OPEN) {
-    //         timeLeft = calculateTimeDifference(
-    //           viewModelCopy.pumpingEndTime.year,
-    //           viewModelCopy.pumpingEndTime.month,
-    //           viewModelCopy.pumpingEndTime.day,
-    //           viewModelCopy.pumpingEndTime.hour,
-    //           viewModelCopy.pumpingEndTime.minute,
-    //           viewModelCopy.pumpingEndTime.second,
-    //         );
-    //       }
-    //     }
-    //     _timeLeft = timeLeft;
-    //   });
-    // });
 
     // Luister naar veranderingen in tab-/venstervisibiliteit
     html.document.onVisibilityChange.listen((event) {
@@ -356,7 +377,117 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ],
               ),
+
+
+
+
+
+
+
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                // Centreer de widgets horizontaal
+                children: <Widget>[
+                  ElevatedButton(
+                    onPressed: () => _addCommand("CHANGE_AREA,GAZON"),
+                    child: Text('Gazon'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => _addCommand("CHANGE_AREA,MOESTUIN"),
+                    child: Text('Moestuin'),
+                  ),
+                ],
+              ),
+
+
+
+
+
+
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                // Centreer de widgets horizontaal
+                children: <Widget>[
+                  ElevatedButton(
+                    onPressed: () {
+                      // Navigeren naar SecondPage
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const Schedules()),
+                      );
+                    },
+                    child: Text('Schedules'),
+                  ),
+                ],
+              ),
+
+
+
+
+
+
+
+
+              StreamBuilder<ViewModel?>(
+                stream: _schedulesStream,
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return CircularProgressIndicator();
+                  }
+                  List<EnrichedSchedule> schedules = snapshot.data!.schedules;
+
+
+                  return ListView.builder(
+                    shrinkWrap: true, // Past de hoogte aan de inhoud aan
+                    itemCount: schedules.length,
+                    itemBuilder: (context, index) {
+                      EnrichedSchedule schedule = schedules[index];
+                      String id = schedule.schedule.id.toString();
+                      String hour = schedule.schedule.scheduledTime.hour.toString();
+                      String minute = schedule.schedule.scheduledTime.minute.toString();
+                      String area = schedule.schedule.erea.name;
+                      String showertime = schedule.schedule.duration.toString();
+                      String interval = schedule.schedule.daysInterval.toString();
+
+                      String nextDay = schedule.nextRun?.day.toString() ?? "";
+                      String nextMonth = schedule.nextRun?.month.toString() ?? "";
+                      String nextYear = schedule.nextRun?.year.toString() ?? "";
+                      String nextHour = schedule.nextRun?.hour.toString() ?? "";
+                      String nextMinute = schedule.nextRun?.minute.toString() ?? "";
+
+                      String scheduleStr = "$id : at $hour:$minute $area, every $interval day(s) for $showertime minutes" ;
+                      String nextRun = "Next run: $nextDay/$nextMonth/$nextYear $nextHour:$nextMinute" ;
+                      String textnaam = "$scheduleStr\n$nextRun" ;
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          // Tekstelement met de naam van de schedule
+                          Text(textnaam, style: TextStyle(fontSize: 16)),
+
+                          // Knop om de schedule te verwijderen
+                          ElevatedButton(
+                            onPressed: () {
+                              //_deleteSchedule(schedule);
+                            },
+                            child: Text('Verwijder'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+              ),
+
+
+
+
             ],
+
+
+
           ),
         ),
       ),

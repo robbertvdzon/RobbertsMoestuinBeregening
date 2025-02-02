@@ -17,7 +17,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 
-const val DISABLE_PUMP_TIME_WHILE_CHANGING_AREA = 20L // when the area was changed, disable the pump for 20 seconds
+const val DISABLE_PUMP_TIME_WHILE_CHANGING_AREA = 30L // when the area was changed, disable the pump for 30 seconds
 
 class ControllerImpl(
     private val hardware: Hardware,
@@ -28,7 +28,7 @@ class ControllerImpl(
     private var requestedState: State = State()
     private var schedules: Schedules = Schedules()
     private var currentIP: String = "Unknown"
-    private var disablePumpUntil = LocalDateTime.now() // when the area was changed, disable the pump for 20 seconds
+    private var disablePumpUntil = LocalDateTime.now() // when the area was changed, disable the pump for 30 seconds
     private var lastKnownIrrigationArea: IrrigationArea? = null
 
     override fun start() {
@@ -102,7 +102,7 @@ class ControllerImpl(
     }
 
     fun saveSchedule() {
-        log.logInfo("Update schedules.json")
+        log.logInfo("Update schedules.json : $schedules")
         val file = File("schedules.json")
         objectMapper.writeValue(file, schedules)
     }
@@ -179,8 +179,8 @@ class ControllerImpl(
         }
         // check if a schedule needs to be removed
         val schedulesToRemove = schedules.schedules.filter {
-            it.endSchedule != null &&
-                    it.endSchedule.isAfterOrEqual(now)
+            it.endDate != null &&
+                    it.endDate.isBefore(now)
         }
         if (schedulesToRemove.isNotEmpty()) {
             schedules.schedules.removeAll(schedulesToRemove)

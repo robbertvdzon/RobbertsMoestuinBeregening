@@ -5,6 +5,8 @@ import com.vdzon.irrigation.api.commandprocessor.CommandProcessorListener
 import com.vdzon.irrigation.api.log.Log
 import com.vdzon.irrigation.api.model.IrrigationArea
 import com.vdzon.irrigation.api.model.Schedule
+import com.vdzon.irrigation.api.model.ScheduleDate
+import com.vdzon.irrigation.api.model.ScheduleTime
 import com.vdzon.irrigation.api.model.Timestamp
 
 class BewateringCommandProcessor(
@@ -54,31 +56,30 @@ class BewateringCommandProcessor(
         if (command.startsWith("ADD_SCHEDULE")) {
             val parts = command.split(",")
             log.logInfo("ADD_SCHEDULE, with ${parts.size} parts : command=$command")
-            if (parts.size == 16) {
-                val id = parts[1]
-                val duration = parts[2].toInt()
-                val daysInterval = parts[3].toInt()
-                val area = IrrigationArea.valueOf(parts[4])
-                val enabled = parts[5].toBoolean()
-                val startYear = parts[6].toInt()
-                val startMonth = parts[7].toInt()
-                val startDay = parts[8].toInt()
-                val startHour = parts[9].toInt()
-                val startMinute = parts[10].toInt()
-                val startSecond = parts[11].toInt()
-                val endYear = parts[12].toIntOrNull()
-                val endMonth = parts[13].toIntOrNull()
-                val endDay = parts[14].toIntOrNull()
-                val endHour = parts[15].toIntOrNull()
-                val endMinute = parts[16].toIntOrNull()
-                val endSecond = parts[17].toIntOrNull()
-                val startSchedule: Timestamp =
-                    Timestamp.buildTimestamp(startYear, startMonth, startDay, startHour, startMinute, startSecond)!!
-                val endSchedule: Timestamp? = Timestamp.buildTimestamp(endYear, endMonth, endDay, endHour, endMinute, endSecond)
+            var index: Int = 1
+            if (parts.size == 14) {
+                val id = parts[index++]
+                val duration = parts[index++].toInt()
+                val daysInterval = parts[index++].toInt()
+                val area = IrrigationArea.valueOf(parts[index++])
+                val enabled = parts[index++].toBoolean()
+                val startYear = parts[index++].toInt()
+                val startMonth = parts[index++].toInt()
+                val startDay = parts[index++].toInt()
+                val endYear = parts[index++].toIntOrNull()
+                val endMonth = parts[index++].toIntOrNull()
+                val endDay = parts[index++].toIntOrNull()
+                val scheduleHour = parts[index++].toInt()
+                val scheduleMinute = parts[index++].toInt()
+
+                val startDate: ScheduleDate = ScheduleDate(startYear, startMonth, startDay)
+                val endDate: ScheduleDate? = if (endYear != null && endMonth != null && endDay != null) ScheduleDate(endYear, endMonth, endMonth) else null
+                val scheduleTime = ScheduleTime(scheduleHour, scheduleMinute)
                 val schedule = Schedule(
                     id,
-                    startSchedule,
-                    endSchedule,
+                    startDate,
+                    endDate,
+                    scheduleTime,
                     duration,
                     daysInterval,
                     area,

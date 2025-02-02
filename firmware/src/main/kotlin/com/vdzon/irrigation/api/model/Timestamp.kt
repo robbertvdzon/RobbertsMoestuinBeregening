@@ -3,6 +3,31 @@ package com.vdzon.irrigation.api.model
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
+data class ScheduleDate(
+    val year: Int,
+    val month: Int,
+    val day: Int,
+){
+    fun getTimestampAt(hour: Int, minute:Int) = Timestamp(year, month, day, hour, minute, 0)
+
+    fun isAfterOrEqual(timestamp: Timestamp): Boolean {
+        val todayAtMidnight = getTimestampAt(23,59)
+        return todayAtMidnight.isAfterOrEqual(timestamp)
+
+    }
+
+    fun isBefore(timestamp: Timestamp): Boolean {
+        val todayAtMidnight = getTimestampAt(0,0)
+        return todayAtMidnight.isBefore(timestamp)
+
+    }
+}
+
+data class ScheduleTime(
+    val hour: Int,
+    val minute: Int,
+)
+
 data class Timestamp (
     val year: Int,
     val month: Int,
@@ -21,6 +46,12 @@ data class Timestamp (
         val thisLocalDateTime = this.toLocalDateTime()
         val otherLocalDateTime = other.toLocalDateTime()
         return thisLocalDateTime.isBefore(otherLocalDateTime) || thisLocalDateTime.isEqual(otherLocalDateTime)
+    }
+
+    fun isBefore(other: Timestamp): Boolean{
+        val thisLocalDateTime = this.toLocalDateTime()
+        val otherLocalDateTime = other.toLocalDateTime()
+        return thisLocalDateTime.isBefore(otherLocalDateTime)
     }
 
     fun toLocalDateTime(): LocalDateTime = LocalDateTime.of(year, month, day, hour, minute)
