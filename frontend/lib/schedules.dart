@@ -59,36 +59,6 @@ class _SchedulesState extends State<Schedules> {
       ),
       body: Column(
         children: <Widget>[
-          // De lijst met schedules in een Expanded widget
-          Expanded(
-            child: StreamBuilder<ViewModel?>(
-              stream: _schedulesStream,
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                List<EnrichedSchedule> schedules = List.from(snapshot.data!.schedules);
-                schedules.sort((a, b) => a.schedule.scheduledTime.totalMinutes.compareTo(b.schedule.scheduledTime.totalMinutes));
-
-                return ListView.builder(
-                  itemCount: schedules.length,
-                  itemBuilder: (context, index) {
-                    EnrichedSchedule schedule = schedules[index];
-                    return ScheduleEditRow(
-                      schedule: schedule,
-                      onSave: (updatedSchedule) {
-                        _addCommand(
-                            "ADD_SCHEDULE,${updatedSchedule.id},${updatedSchedule.duration},${updatedSchedule.daysInterval},${updatedSchedule.area.name},${updatedSchedule.enabled},${updatedSchedule.startDate.year},${updatedSchedule.startDate.month},${updatedSchedule.startDate.day},${updatedSchedule.endDate?.year ?? ''},${updatedSchedule.endDate?.month ?? ''},${updatedSchedule.endDate?.day ?? ''},${updatedSchedule.scheduledTime.hour},${updatedSchedule.scheduledTime.minute}");
-                      },
-                      onDelete: (id) {
-                        _addCommand("REMOVE_SCHEDULE,${id}");
-                      },
-                    );
-                  },
-                );
-              },
-            ),
-          ),
           // Knop om een nieuwe (lege) schedule toe te voegen
           Padding(
             padding: const EdgeInsets.all(16.0),
@@ -139,6 +109,37 @@ class _SchedulesState extends State<Schedules> {
               child: const Text("Nieuwe planning toevoegen"),
             ),
           ),
+          // De lijst met schedules in een Expanded widget
+          Expanded(
+            child: StreamBuilder<ViewModel?>(
+              stream: _schedulesStream,
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                List<EnrichedSchedule> schedules = List.from(snapshot.data!.schedules);
+                schedules.sort((a, b) => a.schedule.scheduledTime.totalMinutes.compareTo(b.schedule.scheduledTime.totalMinutes));
+
+                return ListView.builder(
+                  itemCount: schedules.length,
+                  itemBuilder: (context, index) {
+                    EnrichedSchedule schedule = schedules[index];
+                    return ScheduleEditRow(
+                      schedule: schedule,
+                      onSave: (updatedSchedule) {
+                        _addCommand(
+                            "ADD_SCHEDULE,${updatedSchedule.id},${updatedSchedule.duration},${updatedSchedule.daysInterval},${updatedSchedule.area.name},${updatedSchedule.enabled},${updatedSchedule.startDate.year},${updatedSchedule.startDate.month},${updatedSchedule.startDate.day},${updatedSchedule.endDate?.year ?? ''},${updatedSchedule.endDate?.month ?? ''},${updatedSchedule.endDate?.day ?? ''},${updatedSchedule.scheduledTime.hour},${updatedSchedule.scheduledTime.minute}");
+                      },
+                      onDelete: (id) {
+                        _addCommand("REMOVE_SCHEDULE,${id}");
+                      },
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+
         ],
       ),
     );
