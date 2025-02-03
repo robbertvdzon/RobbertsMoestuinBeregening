@@ -59,11 +59,7 @@ class _SchedulesState extends State<Schedules> {
       ),
       body: Column(
         children: <Widget>[
-          // Als je eventueel een vaste widget boven de ListView wilt,
-          // kun je deze hier plaatsen, bijvoorbeeld een header:
-          // const Text('Header', style: TextStyle(fontSize: 20)),
-
-          // Zorg ervoor dat de ListView de resterende ruimte krijgt:
+          // De lijst met schedules in een Expanded widget
           Expanded(
             child: StreamBuilder<ViewModel?>(
               stream: _schedulesStream,
@@ -73,28 +69,6 @@ class _SchedulesState extends State<Schedules> {
                 }
                 List<EnrichedSchedule> schedules = List.from(snapshot.data!.schedules);
                 schedules.sort((a, b) => a.schedule.id.compareTo(b.schedule.id));
-
-                // Maak een lege schedule (dummy) aan
-                final emptySchedule = EnrichedSchedule(
-                  schedule: Schedule(
-                    id: uuid.v4(), // lege id = nieuwe schedule
-                    startDate: ScheduleDate(
-                      year: DateTime.now().year,
-                      month: DateTime.now().month,
-                      day: DateTime.now().day,
-                    ),
-                    endDate: null,
-                    scheduledTime: ScheduleTime(hour: 8,minute: 0),
-                    duration: 15,
-                    daysInterval: 1,
-                    area: IrrigationArea.GAZON, // standaard waarde
-                    enabled: true,
-                  ),
-                  nextRun: null,
-                );
-                // Voeg de lege schedule toe aan de lijst
-                schedules.add(emptySchedule);
-
                 return ListView.builder(
                   itemCount: schedules.length,
                   itemBuilder: (context, index) {
@@ -102,16 +76,66 @@ class _SchedulesState extends State<Schedules> {
                     return ScheduleEditRow(
                       schedule: schedule,
                       onSave: (updatedSchedule) {
-                        _addCommand("ADD_SCHEDULE,${updatedSchedule.id},${updatedSchedule.duration},${updatedSchedule.daysInterval},${updatedSchedule.area.name},${updatedSchedule.enabled},${updatedSchedule.startDate.year},${updatedSchedule.startDate.month},${updatedSchedule.startDate.day},${updatedSchedule.endDate?.year??''},${updatedSchedule.endDate?.month??''},${updatedSchedule.endDate?.day??''},${updatedSchedule.scheduledTime.hour},${updatedSchedule.scheduledTime.minute}");
+                        _addCommand(
+                            "ADD_SCHEDULE,${updatedSchedule.id},${updatedSchedule.duration},${updatedSchedule.daysInterval},${updatedSchedule.area.name},${updatedSchedule.enabled},${updatedSchedule.startDate.year},${updatedSchedule.startDate.month},${updatedSchedule.startDate.day},${updatedSchedule.endDate?.year ?? ''},${updatedSchedule.endDate?.month ?? ''},${updatedSchedule.endDate?.day ?? ''},${updatedSchedule.scheduledTime.hour},${updatedSchedule.scheduledTime.minute}");
                       },
                       onDelete: (id) {
                         _addCommand("REMOVE_SCHEDULE,${id}");
                       },
-
                     );
                   },
                 );
               },
+            ),
+          ),
+          // Knop om een nieuwe (lege) schedule toe te voegen
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ElevatedButton(
+              onPressed: () {
+                // Maak een lege schedule aan
+                final emptySchedule = EnrichedSchedule(
+                  schedule: Schedule(
+                    id: uuid.v4(), // genereer een nieuwe uuid
+                    startDate: ScheduleDate(
+                      year: DateTime.now().year,
+                      month: DateTime.now().month,
+                      day: DateTime.now().day,
+                    ),
+                    endDate: null,
+                    scheduledTime: ScheduleTime(hour: 8, minute: 0),
+                    duration: 15,
+                    daysInterval: 1,
+                    area: IrrigationArea.GAZON, // standaard waarde
+                    enabled: true,
+                  ),
+                  nextRun: null,
+                );
+                // Navigeer naar een pagina waarin de lege schedule bewerkt kan worden.
+                // De ScheduleEditRow wordt hier gebruikt als een pagina (of maak een aparte pagina voor editing)
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Scaffold(
+                      appBar: AppBar(title: const Text('Nieuwe schedule')),
+                      body: ScheduleEditRow(
+                        schedule: emptySchedule,
+                        onSave: (updatedSchedule) {
+                          // Stuur een ADD-command
+                          _addCommand(
+                            "ADD_SCHEDULE,${updatedSchedule.id},${updatedSchedule.duration},${updatedSchedule.daysInterval},${updatedSchedule.area.name},${updatedSchedule.enabled},${updatedSchedule.startDate.year},${updatedSchedule.startDate.month},${updatedSchedule.startDate.day},${updatedSchedule.endDate?.year ?? ''},${updatedSchedule.endDate?.month ?? ''},${updatedSchedule.endDate?.day ?? ''},${updatedSchedule.scheduledTime.hour},${updatedSchedule.scheduledTime.minute}",
+                          );
+                          Navigator.pop(context);
+                        },
+                        onDelete: (id) {
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ),
+                  ),
+                );
+              },
+              child: const Text("Nieuwe schedule toevoegen"),
             ),
           ),
         ],
