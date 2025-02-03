@@ -198,11 +198,13 @@ class _ScheduleEditRowState extends State<ScheduleEditRow> {
                     controller: _intervalController,
                     keyboardType: TextInputType.number,
                     decoration:
-                        const InputDecoration(labelText: 'Interval (dagen)'),
+                    const InputDecoration(labelText: 'Interval (dagen)'),
                   ),
                 ),
               ],
             ),
+            const SizedBox(height: 8),
+            Text('Volgende planning: ' + _nextRun),
             const SizedBox(height: 8),
             // Derde rij: checkbox voor enabled.
             Row(
@@ -218,16 +220,7 @@ class _ScheduleEditRowState extends State<ScheduleEditRow> {
                   },
                 ),
                 const Text('Ingeschakeld'),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Align(
-                    alignment: Alignment.centerRight, // rechts uitlijnen
-                    child: Text('Volgende planning: ' + _nextRun),
-                  ),
-                ),
               ],
-
-
             ),
             const SizedBox(height: 12),
             // Vierde rij: Opslaan en Verwijder knoppen.
