@@ -217,9 +217,14 @@ class _ScheduleEditRowState extends State<ScheduleEditRow> {
                     }
                   },
                 ),
-                const Text('Enabled'),
+                const Text('Ingeschakeld'),
                 const SizedBox(width: 8),
-                Text('Volgende planning:'+_nextRun),
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.centerRight, // rechts uitlijnen
+                    child: Text('Volgende planning: ' + _nextRun),
+                  ),
+                ),
               ],
 
 

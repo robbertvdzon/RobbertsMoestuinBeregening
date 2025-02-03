@@ -119,6 +119,8 @@ class ScheduleTime {
     final String mm = minute.toString().padLeft(2, '0');
     return "$hh:$mm";
   }
+
+  int get totalMinutes => hour * 60 + minute;
 }
 
 // ScheduleDate class

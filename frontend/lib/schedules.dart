@@ -68,7 +68,8 @@ class _SchedulesState extends State<Schedules> {
                   return const Center(child: CircularProgressIndicator());
                 }
                 List<EnrichedSchedule> schedules = List.from(snapshot.data!.schedules);
-                schedules.sort((a, b) => a.schedule.id.compareTo(b.schedule.id));
+                schedules.sort((a, b) => a.schedule.scheduledTime.totalMinutes.compareTo(b.schedule.scheduledTime.totalMinutes));
+
                 return ListView.builder(
                   itemCount: schedules.length,
                   itemBuilder: (context, index) {
@@ -117,7 +118,7 @@ class _SchedulesState extends State<Schedules> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => Scaffold(
-                      appBar: AppBar(title: const Text('Nieuwe schedule')),
+                      appBar: AppBar(title: const Text('Nieuwe planning')),
                       body: ScheduleEditRow(
                         schedule: emptySchedule,
                         onSave: (updatedSchedule) {
@@ -135,7 +136,7 @@ class _SchedulesState extends State<Schedules> {
                   ),
                 );
               },
-              child: const Text("Nieuwe schedule toevoegen"),
+              child: const Text("Nieuwe planning toevoegen"),
             ),
           ),
         ],
