@@ -102,6 +102,15 @@ class ScheduleDate {
   factory ScheduleDate.fromJson(Map<String, dynamic> json) => _$ScheduleDateFromJson(json);
 
   Map<String, dynamic> toJson() => _$ScheduleDateToJson(this);
+
+  /// Geeft de datum terug in het formaat dd-mm-yyyy
+  String get formattedDate {
+    // Zorg dat dag en maand altijd twee cijfers hebben.
+    final String dd = day.toString().padLeft(2, '0');
+    final String mm = month.toString().padLeft(2, '0');
+    final String yyyy = year.toString();
+    return "$dd-$mm-$yyyy";
+  }
 }
 
 // EnrichedSchedule class
@@ -129,7 +138,7 @@ class Schedule {
   final ScheduleTime scheduledTime;
   final int duration;
   final int daysInterval;
-  final IrrigationArea erea;
+  final IrrigationArea area;
   final bool enabled;
 
   Schedule({
@@ -139,7 +148,7 @@ class Schedule {
     required this.scheduledTime,
     required this.duration,
     required this.daysInterval,
-    required this.erea,
+    required this.area,
     required this.enabled,
   });
 

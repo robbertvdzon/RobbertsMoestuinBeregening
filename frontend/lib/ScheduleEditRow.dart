@@ -1,22 +1,11 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:html' as html;
-
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:json_annotation/json_annotation.dart';
-import 'package:uuid/uuid.dart';
 
-import 'firebase_options.dart';
 import 'model.dart';
-
 
 class ScheduleEditRow extends StatefulWidget {
   final EnrichedSchedule schedule;
-  final Function(EnrichedSchedule updatedSchedule) onSave;
-  final Function(EnrichedSchedule updatedSchedule) onDelete;
+  final Function(Schedule updatedSchedule) onSave;
+  final Function(String id) onDelete;
 
   const ScheduleEditRow({
     Key? key,
@@ -32,6 +21,8 @@ class ScheduleEditRow extends StatefulWidget {
 class _ScheduleEditRowState extends State<ScheduleEditRow> {
   late TextEditingController _hourController;
   late TextEditingController _minuteController;
+  late TextEditingController _startDayController;
+  late TextEditingController _endDayController;
   late TextEditingController _areaController;
   late TextEditingController _durationController;
   late TextEditingController _intervalController;
@@ -46,8 +37,13 @@ class _ScheduleEditRowState extends State<ScheduleEditRow> {
     _minuteController = TextEditingController(
       text: widget.schedule.schedule.scheduledTime.minute.toString(),
     );
+
+    _startDayController = TextEditingController(
+        text: widget.schedule.schedule.startDate.formattedDate);
+    _endDayController = TextEditingController(
+        text: widget.schedule.schedule.endDate?.formattedDate ?? "");
     _areaController = TextEditingController(
-      text: widget.schedule.schedule.erea.name,
+      text: widget.schedule.schedule.area.name,
     );
     _durationController = TextEditingController(
       text: widget.schedule.schedule.duration.toString(),
@@ -61,41 +57,53 @@ class _ScheduleEditRowState extends State<ScheduleEditRow> {
   void dispose() {
     _hourController.dispose();
     _minuteController.dispose();
+    _startDayController.dispose();
+    _endDayController.dispose();
     _areaController.dispose();
     _durationController.dispose();
     _intervalController.dispose();
     super.dispose();
   }
+
   void _handleDelete() {
-    widget.onDelete(widget.schedule);
+    widget.onDelete(widget.schedule.schedule.id);
   }
 
   void _handleSave() {
-    // Maak een bijgewerkte schedule aan met de waarden uit de tekstvelden.
-    // Let op: Je zult dit moeten aanpassen aan de structuur van je model.
-    // Hieronder is een voorbeeld, afhankelijk van hoe je model is gedefinieerd.
-
-    // Eerst kan je de bestaande schedule kopiëren en de gewijzigde waarden instellen.
-    EnrichedSchedule updatedSchedule = widget.schedule;
-    // EnrichedSchedule updatedSchedule = widget.schedule.copyWith(
-    //   schedule: widget.schedule.schedule.copyWith(
-    //     scheduledTime: DateTime(
-    //       widget.schedule.schedule.scheduledTime.year,
-    //       widget.schedule.schedule.scheduledTime.month,
-    //       widget.schedule.schedule.scheduledTime.day,
-    //       int.tryParse(_hourController.text) ?? widget.schedule.schedule.scheduledTime.hour,
-    //       int.tryParse(_minuteController.text) ?? widget.schedule.schedule.scheduledTime.minute,
-    //     ),
-    //     erea: widget.schedule.schedule.erea.copyWith(
-    //       name: _areaController.text,
-    //     ),
-    //     duration: int.tryParse(_durationController.text) ?? widget.schedule.schedule.duration,
-    //     daysInterval: int.tryParse(_intervalController.text) ?? widget.schedule.schedule.daysInterval,
-    //   ),
-    // );
-
-    // Roep de onSave callback aan, zodat de parent weet dat deze schedule is bijgewerkt.
+    Schedule updatedSchedule = Schedule(
+      id: widget.schedule.schedule.id,
+      startDate: tryParse(_startDayController.text) ??
+          widget.schedule.schedule.startDate,
+      endDate: tryParse(_endDayController.text),
+      scheduledTime: widget.schedule.schedule.scheduledTime,
+      duration: widget.schedule.schedule.duration,
+      daysInterval: widget.schedule.schedule.daysInterval,
+      area: widget.schedule.schedule.area,
+      enabled: widget.schedule.schedule.enabled,
+    );
     widget.onSave(updatedSchedule);
+  }
+
+  /// Probeert een string te parsen in het formaat dd-mm-yyyy.
+  /// Geeft een [ScheduleDate] terug als het lukt, anders `null`.
+  static ScheduleDate? tryParse(String? input) {
+    if (input == null || input.trim().isEmpty) return null;
+
+    // Verwacht formaat: dd-mm-yyyy
+    final parts = input.split('-');
+    if (parts.length != 3) return null;
+
+    final day = int.tryParse(parts[0]);
+    final month = int.tryParse(parts[1]);
+    final year = int.tryParse(parts[2]);
+
+    if (day == null || month == null || year == null) return null;
+
+    // Optioneel: je kunt hier nog een basis validatie toevoegen,
+    // bijvoorbeeld of de dag en maand binnen de verwachte grenzen vallen.
+    if (day < 1 || day > 31 || month < 1 || month > 12) return null;
+
+    return ScheduleDate(year: year, month: month, day: day);
   }
 
   @override
@@ -108,7 +116,6 @@ class _ScheduleEditRowState extends State<ScheduleEditRow> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Weergeef bijvoorbeeld het ID of andere info als label
-            Text("Schedule ID: ${widget.schedule.schedule.id}"),
             Row(
               children: [
                 Expanded(
@@ -130,31 +137,56 @@ class _ScheduleEditRowState extends State<ScheduleEditRow> {
                     ),
                   ),
                 ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: TextField(
+                    controller: _areaController,
+                    decoration: const InputDecoration(labelText: 'Gebied'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: TextField(
+                    controller: _durationController,
+                    keyboardType: TextInputType.number,
+                    decoration:
+                        const InputDecoration(labelText: 'Duur (minuten)'),
+                  ),
+                ),
               ],
             ),
-            TextField(
-              controller: _areaController,
-              decoration: const InputDecoration(labelText: 'Gebied'),
-            ),
-            TextField(
-              controller: _durationController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'Duur (minuten)'),
-            ),
-            TextField(
-              controller: _intervalController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'Interval (dagen)'),
-            ),
+            Row(children: [
+              Expanded(
+                  child: TextField(
+                controller: _startDayController,
+                decoration: const InputDecoration(labelText: 'Startdatum'),
+              )),
+              const SizedBox(width: 8),
+              Expanded(
+                  child: TextField(
+                controller: _endDayController,
+                decoration: const InputDecoration(labelText: 'Eind datum'),
+              )),
+              const SizedBox(width: 8),
+              Expanded(
+                  child: TextField(
+                controller: _intervalController,
+                keyboardType: TextInputType.number,
+                decoration:
+                    const InputDecoration(labelText: 'Interval (dagen)'),
+              )),
+            ]),
             const SizedBox(height: 12),
-            ElevatedButton(
-              onPressed: _handleSave,
-              child: const Text('Opslaan'),
-            ),
-            ElevatedButton(
-              onPressed: _handleDelete,
-              child: const Text('Verwijder'),
-            ),
+            Row(children: [
+              ElevatedButton(
+                onPressed: _handleSave,
+                child: const Text('Opslaan'),
+              ),
+              ElevatedButton(
+                onPressed: _handleDelete,
+                child: const Text('Verwijder'),
+              ),
+            ])
           ],
         ),
       ),

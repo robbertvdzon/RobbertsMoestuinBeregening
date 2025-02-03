@@ -273,10 +273,10 @@ class _MyHomePageState extends State<MyHomePage> {
                       // Navigeren naar SecondPage
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) =>  Schedules(title: 'Schedules', viewModel: viewModel,)),
+                        MaterialPageRoute(builder: (context) =>  Schedules(title: 'Planning', viewModel: viewModel,)),
                       );
                     },
-                    child: Text('Schedules'),
+                    child: Text('Planning'),
                   ),
                 ],
               ),

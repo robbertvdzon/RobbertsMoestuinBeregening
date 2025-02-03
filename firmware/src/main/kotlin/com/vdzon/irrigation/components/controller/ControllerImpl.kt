@@ -173,7 +173,7 @@ class ControllerImpl(
                 val closeTime = currentTime
                     .plusMinutes(schedule.duration.toLong())
                 requestedState.closeTime = closeTime
-                requestedState.irrigationArea = schedule.erea
+                requestedState.irrigationArea = schedule.area
                 saveState()
             }
         }
@@ -245,7 +245,7 @@ class ControllerImpl(
         val dayOfWeek = mapDayOfWeek(firstTimestamp.toLocalDateTime().dayOfWeek)
         val hour = if (firstTimestamp.hour < 10) "0${firstTimestamp.hour}" else "${firstTimestamp.hour}"
         val minute = if (firstTimestamp.minute < 10) "0${firstTimestamp.minute}" else "${firstTimestamp.minute}"
-        val area = mapArea(firstSchedule.erea)
+        val area = mapArea(firstSchedule.area)
         val time = "$hour:$minute"
         return "$dayOfWeek $time, $area"
     }

@@ -9,7 +9,7 @@ data class Schedule(
     val scheduledTime: ScheduleTime,
     val duration: Int,
     val daysInterval: Int,
-    val erea: IrrigationArea,
+    val area: IrrigationArea,
     val enabled: Boolean
 ) {
 

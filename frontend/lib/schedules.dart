@@ -80,11 +80,10 @@ class _SchedulesState extends State<Schedules> {
                     return ScheduleEditRow(
                       schedule: schedule,
                       onSave: (updatedSchedule) {
-                        print(
-                            "Updated schedule: ${updatedSchedule.schedule.id}");
+                        _addCommand("ADD_SCHEDULE,${updatedSchedule.id},${updatedSchedule.duration},${updatedSchedule.daysInterval},${updatedSchedule.area.name},${updatedSchedule.enabled},${updatedSchedule.startDate.year},${updatedSchedule.startDate.month},${updatedSchedule.startDate.day},${updatedSchedule.endDate?.year??''},${updatedSchedule.endDate?.month??''},${updatedSchedule.endDate?.day??''},${updatedSchedule.scheduledTime.hour},${updatedSchedule.scheduledTime.minute}");
                       },
-                      onDelete: (deletedSchedule) {
-                        _addCommand("REMOVE_SCHEDULE,${deletedSchedule.schedule.id}");
+                      onDelete: (id) {
+                        _addCommand("REMOVE_SCHEDULE,${id}");
                       },
 
                     );
