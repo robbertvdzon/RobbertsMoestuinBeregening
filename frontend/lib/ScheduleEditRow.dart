@@ -30,6 +30,7 @@ class _ScheduleEditRowState extends State<ScheduleEditRow> {
 
   // Checkbox voor enabled.
   late bool _enabled;
+  late String _nextRun;
 
   @override
   void initState() {
@@ -53,6 +54,7 @@ class _ScheduleEditRowState extends State<ScheduleEditRow> {
     _selectedArea = widget.schedule.schedule.area;
     // Initialiseer de checkbox voor enabled.
     _enabled = widget.schedule.schedule.enabled;
+    _nextRun = widget.schedule.nextRun?.formattedDateTime??"geen planning";
   }
 
   @override
@@ -216,7 +218,11 @@ class _ScheduleEditRowState extends State<ScheduleEditRow> {
                   },
                 ),
                 const Text('Enabled'),
+                const SizedBox(width: 8),
+                Text('Volgende planning:'+_nextRun),
               ],
+
+
             ),
             const SizedBox(height: 12),
             // Vierde rij: Opslaan en Verwijder knoppen.

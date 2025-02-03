@@ -68,6 +68,33 @@ class Timestamp {
   factory Timestamp.fromJson(Map<String, dynamic> json) => _$TimestampFromJson(json);
 
   Map<String, dynamic> toJson() => _$TimestampToJson(this);
+
+  String get formattedDateTime {
+    // Maak een DateTime-object van deze datum (zonder tijdscomponent van nu)
+    final DateTime date = DateTime(year, month, day);
+    final DateTime now = DateTime.now();
+    final DateTime today = DateTime(now.year, now.month, now.day);
+    final DateTime tomorrow = today.add(const Duration(days: 1));
+
+    // Zorg dat uur en minuut altijd twee cijfers hebben.
+    final String hh = hour.toString().padLeft(2, '0');
+    final String mm = minute.toString().padLeft(2, '0');
+
+    if (date == today) {
+      // Als de datum vandaag is, geef "vandaag hh:mm"
+      return "vandaag $hh:$mm";
+    } else if (date == tomorrow) {
+      // Als de datum morgen is, geef "morgen hh:mm"
+      return "morgen $hh:$mm";
+    } else {
+      // Anders: geef dd-mm-yyyy hh:mm
+      final String dd = day.toString().padLeft(2, '0');
+      final String mmFormatted = month.toString().padLeft(2, '0');
+      final String yyyy = year.toString();
+      return "$dd-$mmFormatted-$yyyy $hh:$mm";
+    }
+  }
+
 }
 
 // Timestamp class
