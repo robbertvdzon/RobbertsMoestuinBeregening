@@ -55,7 +55,7 @@ class _SchedulesState extends State<Schedules> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Schedules'),
+        title: const Text('Planning'),
       ),
       body: Column(
         children: <Widget>[
@@ -72,6 +72,7 @@ class _SchedulesState extends State<Schedules> {
                   return const Center(child: CircularProgressIndicator());
                 }
                 List<EnrichedSchedule> schedules = snapshot.data!.schedules;
+                schedules.sort((a, b) => a.schedule.id.compareTo(b.schedule.id));
 
                 return ListView.builder(
                   itemCount: schedules.length,

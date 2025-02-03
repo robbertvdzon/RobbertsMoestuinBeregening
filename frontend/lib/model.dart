@@ -84,6 +84,14 @@ class ScheduleTime {
   factory ScheduleTime.fromJson(Map<String, dynamic> json) => _$ScheduleTimeFromJson(json);
 
   Map<String, dynamic> toJson() => _$ScheduleTimeToJson(this);
+
+  /// Geeft de datum terug in het formaat dd-mm-yyyy
+  String get formattedTime {
+    // Zorg dat dag en maand altijd twee cijfers hebben.
+    final String hh = hour.toString().padLeft(2, '0');
+    final String mm = minute.toString().padLeft(2, '0');
+    return "$hh:$mm";
+  }
 }
 
 // ScheduleDate class
