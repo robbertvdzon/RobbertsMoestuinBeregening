@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'ScheduleEditRow.dart';
 import 'model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:uuid/uuid.dart';
 
 class Schedules extends StatefulWidget {
   const Schedules({
@@ -23,14 +24,13 @@ class Schedules extends StatefulWidget {
 class _SchedulesState extends State<Schedules> {
   late Stream<ViewModel?>
       _schedulesStream; // eigenlijk niet alleen schedules dus!
+  final uuid = Uuid();
+
 
   @override
   void initState() {
     super.initState();
-    _schedulesStream = Stream.periodic(
-        Duration(seconds: 1),
-        (_) => // Raar, waarom elke seconde?
-            widget.viewModel);
+    _schedulesStream = Stream.value(widget.viewModel);
   }
 
   @override
@@ -71,8 +71,29 @@ class _SchedulesState extends State<Schedules> {
                 if (!snapshot.hasData) {
                   return const Center(child: CircularProgressIndicator());
                 }
-                List<EnrichedSchedule> schedules = snapshot.data!.schedules;
+                List<EnrichedSchedule> schedules = List.from(snapshot.data!.schedules);
                 schedules.sort((a, b) => a.schedule.id.compareTo(b.schedule.id));
+
+                // Maak een lege schedule (dummy) aan
+                final emptySchedule = EnrichedSchedule(
+                  schedule: Schedule(
+                    id: uuid.v4(), // lege id = nieuwe schedule
+                    startDate: ScheduleDate(
+                      year: DateTime.now().year,
+                      month: DateTime.now().month,
+                      day: DateTime.now().day,
+                    ),
+                    endDate: null,
+                    scheduledTime: ScheduleTime(hour: 8,minute: 0),
+                    duration: 15,
+                    daysInterval: 1,
+                    area: IrrigationArea.GAZON, // standaard waarde
+                    enabled: true,
+                  ),
+                  nextRun: null,
+                );
+                // Voeg de lege schedule toe aan de lijst
+                schedules.add(emptySchedule);
 
                 return ListView.builder(
                   itemCount: schedules.length,
