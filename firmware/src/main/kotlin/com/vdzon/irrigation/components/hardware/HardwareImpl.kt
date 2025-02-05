@@ -3,7 +3,6 @@ package com.vdzon.irrigation.components.hardware
 import com.pi4j.Pi4J
 import com.pi4j.context.Context
 import com.pi4j.io.gpio.digital.*
-import com.pi4j.plugin.gpiod.provider.gpio.digital.GpioDDigitalInputProvider
 import com.pi4j.plugin.gpiod.provider.gpio.digital.GpioDDigitalOutputProvider
 import com.vdzon.irrigation.api.hardware.Button
 import com.vdzon.irrigation.api.hardware.ButtonListener
@@ -11,7 +10,6 @@ import com.vdzon.irrigation.api.hardware.Hardware
 import com.vdzon.irrigation.api.hardware.Led
 import com.vdzon.irrigation.api.log.Log
 import com.vdzon.irrigation.api.model.IrrigationArea
-import java.util.*
 import kotlin.concurrent.thread
 
 
@@ -26,6 +24,10 @@ class HardwareImpl(
     private lateinit var pumpOffLedDigitalOutput: DigitalOutput
     private lateinit var moestuinLedDigitalOutput: DigitalOutput
     private lateinit var gazonLedDigitalOutput: DigitalOutput
+    private lateinit var moestuin_button: DigitalInput
+    private lateinit var gazon_button: DigitalInput
+    private lateinit var add_5_button: DigitalInput
+    private lateinit var min_5_button: DigitalInput
 
     private var buttonListener: ButtonListener? = null
     private val requiredDisplayLines: MutableMap<Int, String?> = mutableMapOf()
@@ -83,7 +85,6 @@ class HardwareImpl(
         })
         lcd = LcdDisplay(pi4j, 4, 20, log)
         val dout: GpioDDigitalOutputProvider = pi4j.dout()
-        val din: GpioDDigitalInputProvider = pi4j.din()
         val stateChangeLogger = DigitalStateChangeListener { var1 -> log.logInfo(var1.toString()) }
 
         pumpDigitalOutput = dout.create(PUMP_SOLENOID_PIN)
@@ -116,38 +117,46 @@ class HardwareImpl(
         gazonLedDigitalOutput.addListener(stateChangeLogger)
         gazonLedDigitalOutput.high()
 
-        createButton("moestuin_button", MOESTUIN_BUTTON_PIN, din) {
-            if (it.state() === DigitalState.LOW) buttonListener?.onButtonClick(Button.MOESTUIN_AREA)
-        }
-        createButton("gazon_button", GAZON_BUTTON_PIN, din) {
-            if (it.state() === DigitalState.LOW) buttonListener?.onButtonClick(Button.GAZON_AREA)
-        }
-        createButton("add_5_button", PLUS_5_MINUTES_BUTTON_PIN, din) {
-            if (it.state() === DigitalState.LOW) buttonListener?.onButtonClick(Button.PLUS_5_MINUTES)
-        }
-        createButton("min_5_button", MIN_5_MINUTES_BUTTON_PIN, din) {
-            if (it.state() === DigitalState.LOW) buttonListener?.onButtonClick(Button.MIN_5_MINUTES)
-        }
+        moestuin_button = createButton("moestuin_button", MOESTUIN_BUTTON_PIN, this::moestuinButtonPressed)
+        gazon_button = createButton("gazon_button", GAZON_BUTTON_PIN, this::gazonButtonPressed)
+        add_5_button = createButton("add_5_button", PLUS_5_MINUTES_BUTTON_PIN, this::add5ButtonPressed)
+        min_5_button = createButton("min_5_button", MIN_5_MINUTES_BUTTON_PIN, this::min5ButtonPressed)
 
         startDisplayThread()
     }
 
+    fun moestuinButtonPressed(event: DigitalStateChangeEvent<Digital<*, *, *>>){
+        log.logInfo("moestuinButtonPressed:${event.state()}")
+        if (event.state() === DigitalState.LOW) buttonListener?.onButtonClick(Button.MOESTUIN_AREA)
+    }
+    fun gazonButtonPressed(event: DigitalStateChangeEvent<Digital<*, *, *>>){
+        log.logInfo("gazonButtonPressed:${event.state()}")
+        if (event.state() === DigitalState.LOW) buttonListener?.onButtonClick(Button.GAZON_AREA)
+    }
+    fun add5ButtonPressed(event: DigitalStateChangeEvent<Digital<*, *, *>>){
+        log.logInfo("add5ButtonPressed:${event.state()}")
+        if (event.state() === DigitalState.LOW) buttonListener?.onButtonClick(Button.PLUS_5_MINUTES)
+    }
+    fun min5ButtonPressed(event: DigitalStateChangeEvent<Digital<*, *, *>>){
+        log.logInfo("min5ButtonPressed:${event.state()}")
+        if (event.state() === DigitalState.LOW) buttonListener?.onButtonClick(Button.MIN_5_MINUTES)
+    }
+
+
     private fun createButton(
         id: String,
         pinButton: Int,
-        din: GpioDDigitalInputProvider,
         function: (DigitalStateChangeEvent<Digital<*, *, *>>) -> Unit
     ): DigitalInput {
-        val properties = Properties()
-        properties["id"] = id
-        properties["address"] = pinButton
-        properties["pull"] = "DOWN"
-        properties["name"] = id.uppercase()
-        val button = din.create(
-            DigitalInput.newConfigBuilder(pi4j)
-                .load(properties)
-                .build()
-        )
+
+        val buttonConfig = DigitalInput.newConfigBuilder(pi4j)
+            .id(id)
+            .name(id)
+            .address(pinButton)
+            .pull(PullResistance.PULL_DOWN)
+            .debounce(3000L)
+
+        val button = pi4j.create(buttonConfig);
         button.addListener(function)
         return button
     }
