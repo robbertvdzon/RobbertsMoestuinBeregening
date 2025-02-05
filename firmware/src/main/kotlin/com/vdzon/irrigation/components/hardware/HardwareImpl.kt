@@ -72,9 +72,7 @@ class HardwareImpl(
     }
 
     override fun start() {
-        thread(start = true) {
-            startHardware()
-        }
+        startHardware()
     }
 
     private fun startHardware() {
@@ -117,36 +115,84 @@ class HardwareImpl(
         gazonLedDigitalOutput.addListener(stateChangeLogger)
         gazonLedDigitalOutput.high()
 
-        moestuin_button = createButton("moestuin_button", MOESTUIN_BUTTON_PIN, this::moestuinButtonPressed)
-        gazon_button = createButton("gazon_button", GAZON_BUTTON_PIN, this::gazonButtonPressed)
-        add_5_button = createButton("add_5_button", PLUS_5_MINUTES_BUTTON_PIN, this::add5ButtonPressed)
-        min_5_button = createButton("min_5_button", MIN_5_MINUTES_BUTTON_PIN, this::min5ButtonPressed)
+        moestuin_button = createButton("moestuin_button", MOESTUIN_BUTTON_PIN)
+        gazon_button = createButton("gazon_button", GAZON_BUTTON_PIN)
+        add_5_button = createButton("add_5_button", PLUS_5_MINUTES_BUTTON_PIN)
+        min_5_button = createButton("min_5_button", MIN_5_MINUTES_BUTTON_PIN)
 
-        startDisplayThread()
+        thread(start = true) {
+            startListenButtonThread()
+        }
+
+        thread(start = true) {
+            startDisplayThread()
+        }
+
     }
 
-    fun moestuinButtonPressed(event: DigitalStateChangeEvent<Digital<*, *, *>>){
-        log.logInfo("moestuinButtonPressed:${event.state()}")
-        if (event.state() === DigitalState.LOW) buttonListener?.onButtonClick(Button.MOESTUIN_AREA)
+
+    /*
+    Gebruik polling om de buttons uit te lezen.
+    Gebruik van listeners op de buttons was niet stabiel,
+    het gebeurde vaak dan een knop ineens niet meer werkte
+     */
+    var lastStateMoestuinButton: DigitalState? = null
+    var lastStateGazonButton: DigitalState? = null
+    var lastStatePlus5Button: DigitalState? = null
+    var lastStateMin5Button: DigitalState? = null
+    fun startListenButtonThread() {
+        lastStateMoestuinButton = moestuin_button.state()
+        lastStateGazonButton = gazon_button.state()
+        lastStatePlus5Button = add_5_button.state()
+        lastStateMin5Button = min_5_button.state()
+        while (true) {
+            try {
+                val newStateMoestuinButton = moestuin_button.state()
+                val newStateGazonButton = gazon_button.state()
+                val newStatePlus5Button = add_5_button.state()
+                val newStateMin5Button = min_5_button.state()
+
+                if (newStateMoestuinButton!=lastStateMoestuinButton) moestuinButtonPressed(newStateMoestuinButton)
+                if (newStateGazonButton!=lastStateGazonButton) gazonButtonPressed(newStateGazonButton)
+                if (newStatePlus5Button!=lastStatePlus5Button) add5ButtonPressed(newStatePlus5Button)
+                if (newStateMin5Button!=lastStateMin5Button) min5ButtonPressed(newStateMin5Button)
+
+                lastStateMoestuinButton = newStateMoestuinButton
+                lastStateGazonButton = newStateGazonButton
+                lastStatePlus5Button = newStatePlus5Button
+                lastStateMin5Button = newStateMin5Button
+                sleep()
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
-    fun gazonButtonPressed(event: DigitalStateChangeEvent<Digital<*, *, *>>){
-        log.logInfo("gazonButtonPressed:${event.state()}")
-        if (event.state() === DigitalState.LOW) buttonListener?.onButtonClick(Button.GAZON_AREA)
+
+    fun moestuinButtonPressed(state: DigitalState) {
+        log.logInfo("moestuinButtonPressed:${state}")
+        if (state === DigitalState.LOW) buttonListener?.onButtonClick(Button.MOESTUIN_AREA)
     }
-    fun add5ButtonPressed(event: DigitalStateChangeEvent<Digital<*, *, *>>){
-        log.logInfo("add5ButtonPressed:${event.state()}")
-        if (event.state() === DigitalState.LOW) buttonListener?.onButtonClick(Button.PLUS_5_MINUTES)
+
+    fun gazonButtonPressed(state: DigitalState) {
+        log.logInfo("gazonButtonPressed:${state}")
+        if (state === DigitalState.LOW) buttonListener?.onButtonClick(Button.GAZON_AREA)
     }
-    fun min5ButtonPressed(event: DigitalStateChangeEvent<Digital<*, *, *>>){
-        log.logInfo("min5ButtonPressed:${event.state()}")
-        if (event.state() === DigitalState.LOW) buttonListener?.onButtonClick(Button.MIN_5_MINUTES)
+
+    fun add5ButtonPressed(state: DigitalState) {
+        log.logInfo("add5ButtonPressed:${state}")
+        if (state === DigitalState.LOW) buttonListener?.onButtonClick(Button.PLUS_5_MINUTES)
+    }
+
+    fun min5ButtonPressed(state: DigitalState) {
+        log.logInfo("min5ButtonPressed:${state}")
+        if (state === DigitalState.LOW) buttonListener?.onButtonClick(Button.MIN_5_MINUTES)
     }
 
 
     private fun createButton(
         id: String,
-        pinButton: Int,
-        function: (DigitalStateChangeEvent<Digital<*, *, *>>) -> Unit
+        pinButton: Int
     ): DigitalInput {
 
         val buttonConfig = DigitalInput.newConfigBuilder(pi4j)
@@ -157,7 +203,6 @@ class HardwareImpl(
             .debounce(3000L)
 
         val button = pi4j.create(buttonConfig);
-        button.addListener(function)
         return button
     }
 
