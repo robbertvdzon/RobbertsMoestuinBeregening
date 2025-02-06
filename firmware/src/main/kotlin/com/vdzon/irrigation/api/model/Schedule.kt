@@ -27,8 +27,7 @@ data class Schedule(
             month = from.month,
             day = from.day,
             hour = scheduledTime.hour,
-            minute = scheduledTime.minute,
-            second = 0
+            minute = scheduledTime.minute
         )
         while (true) {
             val startTimeSchedule = startDate.getTimestampAt(0, 0)
