@@ -6,16 +6,17 @@ import 'ScheduleEditRow.dart';
 import 'model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uuid/uuid.dart';
+import 'package:provider/provider.dart';
+import 'viewModelProvider.dart';
+
 
 class Schedules extends StatefulWidget {
   const Schedules({
     super.key,
-    required this.title,
-    required this.viewModel,
+    required this.title
   });
 
   final String title;
-  final ViewModel? viewModel;
 
   @override
   State<Schedules> createState() => _SchedulesState();
@@ -30,7 +31,7 @@ class _SchedulesState extends State<Schedules> {
   @override
   void initState() {
     super.initState();
-    _schedulesStream = Stream.value(widget.viewModel);
+    // _schedulesStream = Stream.value(widget.viewModel);
   }
 
   @override
@@ -53,13 +54,18 @@ class _SchedulesState extends State<Schedules> {
 
   @override
   Widget build(BuildContext context) {
+    final viewModelProvider = Provider.of<ViewModelProvider>(context);
+    final viewModel = viewModelProvider.viewModel;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Planning'),
       ),
-      body: Column(
-        children: <Widget>[
-          // Knop om een nieuwe (lege) schedule toe te voegen
+      body: viewModel == null
+          ? Center(child: CircularProgressIndicator())
+          : Column(
+        children: [
+          // Knop toevoegen boven de lijst
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(
@@ -82,8 +88,8 @@ class _SchedulesState extends State<Schedules> {
                   ),
                   nextRun: null,
                 );
+
                 // Navigeer naar een pagina waarin de lege schedule bewerkt kan worden.
-                // De ScheduleEditRow wordt hier gebruikt als een pagina (of maak een aparte pagina voor editing)
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -92,11 +98,10 @@ class _SchedulesState extends State<Schedules> {
                       body: ScheduleEditRow(
                         schedule: emptySchedule,
                         onSave: (updatedSchedule) {
-                          // Stuur een ADD-command
                           _addCommand(
                             "ADD_SCHEDULE,${updatedSchedule.id},${updatedSchedule.duration},${updatedSchedule.daysInterval},${updatedSchedule.area.name},${updatedSchedule.enabled},${updatedSchedule.startDate.year},${updatedSchedule.startDate.month},${updatedSchedule.startDate.day},${updatedSchedule.endDate?.year ?? ''},${updatedSchedule.endDate?.month ?? ''},${updatedSchedule.endDate?.day ?? ''},${updatedSchedule.scheduledTime.hour},${updatedSchedule.scheduledTime.minute}",
                           );
-                          Navigator.pop(context);
+                          // Navigator.pop(context);
                         },
                         onDelete: (id) {
                           Navigator.pop(context);
@@ -109,39 +114,30 @@ class _SchedulesState extends State<Schedules> {
               child: const Text("Nieuwe planning toevoegen"),
             ),
           ),
-          // De lijst met schedules in een Expanded widget
-          Expanded(
-            child: StreamBuilder<ViewModel?>(
-              stream: _schedulesStream,
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                List<EnrichedSchedule> schedules = List.from(snapshot.data!.schedules);
-                schedules.sort((a, b) => a.schedule.scheduledTime.totalMinutes.compareTo(b.schedule.scheduledTime.totalMinutes));
 
-                return ListView.builder(
-                  itemCount: schedules.length,
-                  itemBuilder: (context, index) {
-                    EnrichedSchedule schedule = schedules[index];
-                    return ScheduleEditRow(
-                      schedule: schedule,
-                      onSave: (updatedSchedule) {
-                        _addCommand(
-                            "ADD_SCHEDULE,${updatedSchedule.id},${updatedSchedule.duration},${updatedSchedule.daysInterval},${updatedSchedule.area.name},${updatedSchedule.enabled},${updatedSchedule.startDate.year},${updatedSchedule.startDate.month},${updatedSchedule.startDate.day},${updatedSchedule.endDate?.year ?? ''},${updatedSchedule.endDate?.month ?? ''},${updatedSchedule.endDate?.day ?? ''},${updatedSchedule.scheduledTime.hour},${updatedSchedule.scheduledTime.minute}");
-                      },
-                      onDelete: (id) {
-                        _addCommand("REMOVE_SCHEDULE,${id}");
-                      },
-                    );
+          // De lijst met planningen
+          Expanded(
+            child: ListView.builder(
+              itemCount: viewModel.schedules.length,
+              itemBuilder: (context, index) {
+                final schedule = viewModel.schedules[index];
+                return ScheduleEditRow(
+                  schedule: schedule,
+                  onSave: (updatedSchedule) {
+                    _addCommand(
+                        "ADD_SCHEDULE,${updatedSchedule.id},${updatedSchedule.duration},${updatedSchedule.daysInterval},${updatedSchedule.area.name},${updatedSchedule.enabled},${updatedSchedule.startDate.year},${updatedSchedule.startDate.month},${updatedSchedule.startDate.day},${updatedSchedule.endDate?.year ?? ''},${updatedSchedule.endDate?.month ?? ''},${updatedSchedule.endDate?.day ?? ''},${updatedSchedule.scheduledTime.hour},${updatedSchedule.scheduledTime.minute}");
+                  },
+                  onDelete: (id) {
+                    _addCommand("REMOVE_SCHEDULE,${id}");
                   },
                 );
               },
             ),
           ),
-
         ],
       ),
     );
   }
+
+
 }

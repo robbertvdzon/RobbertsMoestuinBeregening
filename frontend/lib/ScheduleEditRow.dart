@@ -69,7 +69,7 @@ class _ScheduleEditRowState extends State<ScheduleEditRow> {
 
   void _handleDelete() {
     widget.onDelete(widget.schedule.schedule.id);
-    Navigator.pop(context);
+    // Navigator.pop(context);
   }
 
   void _handleSave() {

@@ -2,22 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:uuid/uuid.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:html' as html;
-import 'package:json_annotation/json_annotation.dart';
-import 'dart:convert';
 import 'dart:async';
 import 'schedules.dart';
 import 'model.dart';
+import 'package:provider/provider.dart';
+import 'viewModelProvider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  // final _db = FirebaseFirestore.instance;
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => ViewModelProvider(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -67,14 +70,10 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
-  // late Timer _timer;
-  late ViewModel? viewModel = null;
-  // String _timeLeft = "";
   late Stream<String> _timeStream;
-  late Stream<ViewModel?> _schedulesStream; // eigenlijk niet alleen schedules dus!
 
-  String getTimeLeft(){
+
+  String getTimeLeft(ViewModel? viewModel){
         String timeLeft = "Unknown";
         final viewModelCopy = viewModel;
         if (viewModelCopy!=null) {
@@ -99,10 +98,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     _timeStream = Stream.periodic(Duration(seconds: 1), (_) =>
-        getTimeLeft()
-    );
-    _schedulesStream = Stream.periodic(Duration(seconds: 1), (_) =>
-        viewModel
+        ""
     );
     _requestBackendUpdates();
 
@@ -116,8 +112,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void dispose() {
-    // Zorg ervoor dat de timer wordt geannuleerd om resource-lekken te voorkomen
-    // _timer.cancel();
     super.dispose();
   }
 
@@ -141,6 +135,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final viewModelProvider = Provider.of<ViewModelProvider>(context);
+    final viewModel = viewModelProvider.viewModel;
+
     return Scaffold(
       body: Center(
         child: Container(
@@ -162,35 +159,11 @@ class _MyHomePageState extends State<MyHomePage> {
             children: <Widget>[
               SizedBox(height: 400),
 
-              StreamBuilder<DocumentSnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('bewatering')
-                    .doc('status')
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return CircularProgressIndicator(); // Toon een laadindicator
-                  }
-                  if (!snapshot.hasData || !snapshot.data!.exists) {
-                    return Text('Document niet gevonden');
-                  }
+            ElevatedButton(
+              onPressed: _requestBackendUpdates,
+              child: Text('Laatste status: {viewModel}'),
+            ),
 
-                  // Haal de data op uit het document
-                  Map<String, dynamic> data =
-                  snapshot.data!.data() as Map<String, dynamic>;
-
-                  String jsonString = data['viewModel'].toString();
-                  final jsonMap = json.decode(jsonString) as Map<String, dynamic>;
-                  viewModel = ViewModel.fromJson(jsonMap);
-                  String lastupdate = data['lastupdate'].toString();
-
-                  // Toon de inhoud van een specifiek veld (bijv. 'status')
-                  return ElevatedButton(
-                    onPressed: _requestBackendUpdates,
-                    child: Text('Laatste status: ${lastupdate ?? '-'}'),
-                  );
-                },
-              ),
               SizedBox(height: 10),
 
 
@@ -218,7 +191,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     final time = snapshot.data!;
                     return ElevatedButton(
                       onPressed: _nothing,
-                      child: Text('${time}'),
+                      child: Text('${getTimeLeft(viewModel)}'),
                     );
                   },
                 ),
@@ -273,7 +246,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       // Navigeren naar SecondPage
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) =>  Schedules(title: 'Planning', viewModel: viewModel,)),
+                        MaterialPageRoute(builder: (context) =>  Schedules(title: 'Planning')),
                       );
                     },
                     child: Text('Planning'),
