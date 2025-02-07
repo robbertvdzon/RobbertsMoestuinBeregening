@@ -17,7 +17,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 
-const val DISABLE_PUMP_TIME_WHILE_CHANGING_AREA = 30L // when the area was changed, disable the pump for 30 seconds
+const val DISABLE_PUMP_TIME_WHILE_CHANGING_AREA = 0L // when the area was changed, disable the pump for 30 seconds
 
 class ControllerImpl(
     private val hardware: Hardware,
@@ -242,22 +242,13 @@ class ControllerImpl(
         val firstSchedule = nextSchudules.firstOrNull()
         val firstTimestamp = firstSchedule?.findFirstSchedule(now)
         if (firstTimestamp == null) return "Geen planning"
-        val dayOfWeek = mapDayOfWeek(firstTimestamp.toLocalDateTime().dayOfWeek)
+
+        val dayOfWeek = firstTimestamp.getReadableDay()
         val hour = if (firstTimestamp.hour < 10) "0${firstTimestamp.hour}" else "${firstTimestamp.hour}"
         val minute = if (firstTimestamp.minute < 10) "0${firstTimestamp.minute}" else "${firstTimestamp.minute}"
         val area = mapArea(firstSchedule.area)
         val time = "$hour:$minute"
-        return "$dayOfWeek $time, $area"
-    }
-
-    private fun mapDayOfWeek(dow: DayOfWeek) = when (dow) {
-        DayOfWeek.MONDAY -> "Ma"
-        DayOfWeek.TUESDAY -> "Di"
-        DayOfWeek.WEDNESDAY -> "Wo"
-        DayOfWeek.THURSDAY -> "Do"
-        DayOfWeek.FRIDAY -> "Vr"
-        DayOfWeek.SATURDAY -> "Za"
-        DayOfWeek.SUNDAY -> "Zo"
+        return "$dayOfWeek$time, $area"
     }
 
     private fun mapArea(area: IrrigationArea) = when (area) {

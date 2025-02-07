@@ -85,7 +85,8 @@ class _MyHomePageState extends State<MyHomePage> {
               viewModelCopy.pumpingEndTime.month,
               viewModelCopy.pumpingEndTime.day,
               viewModelCopy.pumpingEndTime.hour,
-              viewModelCopy.pumpingEndTime.minute
+              viewModelCopy.pumpingEndTime.minute,
+              viewModelCopy.pumpingEndTime.second,
             );
           }
         }
@@ -291,9 +292,9 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  String calculateTimeDifference(int year, int month, int day, int hour, int minute) {
+  String calculateTimeDifference(int year, int month, int day, int hour, int minute, int second) {
     // Maak een DateTime object van de gegeven waarden
-    final targetDateTime = DateTime(year, month, day, hour, minute, 0);
+    final targetDateTime = DateTime(year, month, day, hour, minute, second);
 
     // Huidige tijd
     final now = DateTime.now();

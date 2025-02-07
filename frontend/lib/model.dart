@@ -54,6 +54,7 @@ class Timestamp {
   final int day;
   final int hour;
   final int minute;
+  final int second;
 
   Timestamp({
     required this.year,
@@ -61,6 +62,7 @@ class Timestamp {
     required this.day,
     required this.hour,
     required this.minute,
+    required this.second,
   });
 
   factory Timestamp.fromJson(Map<String, dynamic> json) => _$TimestampFromJson(json);

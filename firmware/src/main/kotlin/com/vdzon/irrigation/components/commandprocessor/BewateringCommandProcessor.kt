@@ -73,7 +73,7 @@ class BewateringCommandProcessor(
                 val scheduleMinute = parts[index++].toInt()
 
                 val startDate: ScheduleDate = ScheduleDate(startYear, startMonth, startDay)
-                val endDate: ScheduleDate? = if (endYear != null && endMonth != null && endDay != null) ScheduleDate(endYear, endMonth, endMonth) else null
+                val endDate: ScheduleDate? = if (endYear != null && endMonth != null && endDay != null) ScheduleDate(endYear, endMonth, endDay) else null
                 val scheduleTime = ScheduleTime(scheduleHour, scheduleMinute)
                 val schedule = Schedule(
                     id,
