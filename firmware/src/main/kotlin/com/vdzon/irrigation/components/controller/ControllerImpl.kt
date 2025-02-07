@@ -159,7 +159,12 @@ class ControllerImpl(
 
         // Start the check in the first second of every minute
         executor.scheduleAtFixedRate({
-            checkSchedules()
+            try {
+                checkSchedules()
+            }
+            catch (e: Exception){
+                e.printStackTrace()
+            }
         }, delayInMillis, 60_000, TimeUnit.MILLISECONDS)
     }
 

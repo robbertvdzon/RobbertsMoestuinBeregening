@@ -1,13 +1,15 @@
-import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
+import 'dart:async';
+import 'dart:html' as html;
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:html' as html;
-import 'dart:async';
-import 'schedules.dart';
-import 'model.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import 'firebase_options.dart';
+import 'model.dart';
+import 'schedules.dart';
 import 'viewModelProvider.dart';
 
 void main() async {
@@ -72,34 +74,29 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   late Stream<String> _timeStream;
 
-
-  String getTimeLeft(ViewModel? viewModel){
-        String timeLeft = "Unknown";
-        final viewModelCopy = viewModel;
-        if (viewModelCopy!=null) {
-          if (viewModelCopy.pumpStatus == PumpStatus.CLOSE) timeLeft = "Closed";
-          if (viewModelCopy.pumpStatus == PumpStatus.OPEN) {
-            timeLeft = calculateTimeDifference(
-              viewModelCopy.pumpingEndTime.year,
-              viewModelCopy.pumpingEndTime.month,
-              viewModelCopy.pumpingEndTime.day,
-              viewModelCopy.pumpingEndTime.hour,
-              viewModelCopy.pumpingEndTime.minute,
-              viewModelCopy.pumpingEndTime.second,
-            );
-          }
-        }
-        return timeLeft;
-
+  String getTimeLeft(ViewModel? viewModel) {
+    String timeLeft = "Unknown";
+    final viewModelCopy = viewModel;
+    if (viewModelCopy != null) {
+      if (viewModelCopy.pumpStatus == PumpStatus.CLOSE) timeLeft = "Closed";
+      if (viewModelCopy.pumpStatus == PumpStatus.OPEN) {
+        timeLeft = calculateTimeDifference(
+          viewModelCopy.pumpingEndTime.year,
+          viewModelCopy.pumpingEndTime.month,
+          viewModelCopy.pumpingEndTime.day,
+          viewModelCopy.pumpingEndTime.hour,
+          viewModelCopy.pumpingEndTime.minute,
+          viewModelCopy.pumpingEndTime.second,
+        );
+      }
+    }
+    return timeLeft;
   }
-
 
   @override
   void initState() {
     super.initState();
-    _timeStream = Stream.periodic(Duration(seconds: 1), (_) =>
-        ""
-    );
+    _timeStream = Stream.periodic(Duration(seconds: 1), (_) => "");
     _requestBackendUpdates();
 
     // Luister naar veranderingen in tab-/venstervisibiliteit
@@ -135,8 +132,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final viewModelProvider = Provider.of<BeregeningDataProvider>(context);
-    final viewModel = viewModelProvider.beregeningData;
+    final beregeningDataProvider = Provider.of<BeregeningDataProvider>(context);
+    final beregeningData = beregeningDataProvider.beregeningData;
 
     return Scaffold(
       body: Center(
@@ -157,16 +154,11 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Column(
             // mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              SizedBox(height: 400),
-
-            ElevatedButton(
-              onPressed: _requestBackendUpdates,
-              child: Text('Laatste status: ${viewModel?.lastUpdate}'),
-            ),
-
+              SizedBox(height: 270),
+              Text('Volgende planning: ${beregeningData?.viewModel.nextSchedule}'),
               SizedBox(height: 10),
-
-
+              Text('Laatste status: ${beregeningData?.lastUpdate}'),
+              SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 // Centreer de widgets horizontaal
@@ -182,19 +174,19 @@ class _MyHomePageState extends State<MyHomePage> {
                   SizedBox(width: 10),
                   // Voeg een beetje ruimte tussen de widgets
 
-                StreamBuilder<String>(
-                  stream: _timeStream,
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return CircularProgressIndicator();
-                    }
-                    final time = snapshot.data!;
-                    return ElevatedButton(
-                      onPressed: _nothing,
-                      child: Text('${getTimeLeft(viewModel?.viewModel)}'),
-                    );
-                  },
-                ),
+                  StreamBuilder<String>(
+                    stream: _timeStream,
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return CircularProgressIndicator();
+                      }
+                      final time = snapshot.data!;
+                      return ElevatedButton(
+                        onPressed: _nothing,
+                        child: Text('${getTimeLeft(beregeningData?.viewModel)}'),
+                      );
+                    },
+                  ),
 
                   ElevatedButton(
                     onPressed: () => _addCommand("UPDATE_IRRIGATION_TIME,30"),
@@ -208,14 +200,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ],
               ),
-
-
-
-
-
-
-
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 // Centreer de widgets horizontaal
@@ -230,13 +214,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ],
               ),
-
-
-
-
-
-
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 // Centreer de widgets horizontaal
@@ -246,26 +223,23 @@ class _MyHomePageState extends State<MyHomePage> {
                       // Navigeren naar SecondPage
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) =>  Schedules(title: 'Planning')),
+                        MaterialPageRoute(
+                            builder: (context) => Schedules(title: 'Planning')),
                       );
                     },
                     child: Text('Planning'),
                   ),
                 ],
               ),
-
-
             ],
-
-
-
           ),
         ),
       ),
     );
   }
 
-  String calculateTimeDifference(int year, int month, int day, int hour, int minute, int second) {
+  String calculateTimeDifference(
+      int year, int month, int day, int hour, int minute, int second) {
     // Maak een DateTime object van de gegeven waarden
     final targetDateTime = DateTime(year, month, day, hour, minute, second);
 
