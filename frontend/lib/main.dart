@@ -17,7 +17,7 @@ void main() async {
   );
   runApp(
     ChangeNotifierProvider(
-      create: (context) => ViewModelProvider(),
+      create: (context) => BeregeningDataProvider(),
       child: const MyApp(),
     ),
   );
@@ -135,8 +135,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final viewModelProvider = Provider.of<ViewModelProvider>(context);
-    final viewModel = viewModelProvider.viewModel;
+    final viewModelProvider = Provider.of<BeregeningDataProvider>(context);
+    final viewModel = viewModelProvider.beregeningData;
 
     return Scaffold(
       body: Center(

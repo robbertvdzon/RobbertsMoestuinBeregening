@@ -54,8 +54,8 @@ class _SchedulesState extends State<Schedules> {
 
   @override
   Widget build(BuildContext context) {
-    final viewModelProvider = Provider.of<ViewModelProvider>(context);
-    final viewModel = viewModelProvider.viewModel;
+    final viewModelProvider = Provider.of<BeregeningDataProvider>(context);
+    final viewModel = viewModelProvider.beregeningData;
 
     return Scaffold(
       appBar: AppBar(

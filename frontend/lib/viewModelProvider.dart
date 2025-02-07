@@ -3,12 +3,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:convert';
 import 'model.dart';
 
-class ViewModelProvider with ChangeNotifier {
-  BeregeningData? _viewModel;
+class BeregeningDataProvider with ChangeNotifier {
+  BeregeningData? _beregeningData;
 
-  BeregeningData? get viewModel => _viewModel;
+  BeregeningData? get beregeningData => _beregeningData;
 
-  ViewModelProvider() {
+  BeregeningDataProvider() {
     _listenToFirestore();
   }
 
@@ -24,8 +24,8 @@ class ViewModelProvider with ChangeNotifier {
         final jsonMap = json.decode(jsonString) as Map<String, dynamic>;
         final viewModel = ViewModel.fromJson(jsonMap);
         String lastupdate = data['lastupdate'].toString();
-        _viewModel = BeregeningData(viewModel: viewModel,lastUpdate: lastupdate);
-        notifyListeners(); // Notificeer de UI dat de ViewModel is geüpdatet
+        _beregeningData = BeregeningData(viewModel: viewModel,lastUpdate: lastupdate);
+        notifyListeners();
       }
     });
   }
