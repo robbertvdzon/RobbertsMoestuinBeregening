@@ -13,6 +13,17 @@ import 'schedules.dart';
 part 'model.g.dart';
 
 
+class BeregeningData {
+  final ViewModel viewModel;
+  final String lastUpdate;
+
+  BeregeningData({
+    required this.viewModel,
+    required this.lastUpdate,
+  });
+
+}
+
 // Top-level ViewModel class
 @JsonSerializable(explicitToJson: true)
 class ViewModel {
@@ -33,7 +44,8 @@ class ViewModel {
   });
 
   // Factory method for JSON deserialization
-  factory ViewModel.fromJson(Map<String, dynamic> json) => _$ViewModelFromJson(json);
+  factory ViewModel.fromJson(Map<String, dynamic> json) =>
+      _$ViewModelFromJson(json);
 
   // Method for JSON serialization
   Map<String, dynamic> toJson() => _$ViewModelToJson(this);
@@ -65,7 +77,8 @@ class Timestamp {
     required this.second,
   });
 
-  factory Timestamp.fromJson(Map<String, dynamic> json) => _$TimestampFromJson(json);
+  factory Timestamp.fromJson(Map<String, dynamic> json) =>
+      _$TimestampFromJson(json);
 
   Map<String, dynamic> toJson() => _$TimestampToJson(this);
 
@@ -108,7 +121,8 @@ class ScheduleTime {
     required this.minute,
   });
 
-  factory ScheduleTime.fromJson(Map<String, dynamic> json) => _$ScheduleTimeFromJson(json);
+  factory ScheduleTime.fromJson(Map<String, dynamic> json) =>
+      _$ScheduleTimeFromJson(json);
 
   Map<String, dynamic> toJson() => _$ScheduleTimeToJson(this);
 
@@ -136,7 +150,8 @@ class ScheduleDate {
     required this.day,
   });
 
-  factory ScheduleDate.fromJson(Map<String, dynamic> json) => _$ScheduleDateFromJson(json);
+  factory ScheduleDate.fromJson(Map<String, dynamic> json) =>
+      _$ScheduleDateFromJson(json);
 
   Map<String, dynamic> toJson() => _$ScheduleDateToJson(this);
 
@@ -161,7 +176,8 @@ class EnrichedSchedule {
     this.nextRun,
   });
 
-  factory EnrichedSchedule.fromJson(Map<String, dynamic> json) => _$EnrichedScheduleFromJson(json);
+  factory EnrichedSchedule.fromJson(Map<String, dynamic> json) =>
+      _$EnrichedScheduleFromJson(json);
 
   Map<String, dynamic> toJson() => _$EnrichedScheduleToJson(this);
 }
@@ -189,7 +205,8 @@ class Schedule {
     required this.enabled,
   });
 
-  factory Schedule.fromJson(Map<String, dynamic> json) => _$ScheduleFromJson(json);
+  factory Schedule.fromJson(Map<String, dynamic> json) =>
+      _$ScheduleFromJson(json);
 
   Map<String, dynamic> toJson() => _$ScheduleToJson(this);
 }

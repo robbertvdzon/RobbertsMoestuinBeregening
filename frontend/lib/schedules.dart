@@ -118,9 +118,9 @@ class _SchedulesState extends State<Schedules> {
           // De lijst met planningen
           Expanded(
             child: ListView.builder(
-              itemCount: viewModel.schedules.length,
+              itemCount: viewModel.viewModel.schedules.length,
               itemBuilder: (context, index) {
-                final schedule = viewModel.schedules[index];
+                final schedule = viewModel.viewModel.schedules[index];
                 return ScheduleEditRow(
                   schedule: schedule,
                   onSave: (updatedSchedule) {

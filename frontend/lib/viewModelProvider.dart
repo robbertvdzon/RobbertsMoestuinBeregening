@@ -4,9 +4,9 @@ import 'dart:convert';
 import 'model.dart';
 
 class ViewModelProvider with ChangeNotifier {
-  ViewModel? _viewModel;
+  BeregeningData? _viewModel;
 
-  ViewModel? get viewModel => _viewModel;
+  BeregeningData? get viewModel => _viewModel;
 
   ViewModelProvider() {
     _listenToFirestore();
@@ -22,7 +22,9 @@ class ViewModelProvider with ChangeNotifier {
         Map<String, dynamic> data = snapshot.data()!;
         String jsonString = data['viewModel'].toString();
         final jsonMap = json.decode(jsonString) as Map<String, dynamic>;
-        _viewModel = ViewModel.fromJson(jsonMap);
+        final viewModel = ViewModel.fromJson(jsonMap);
+        String lastupdate = data['lastupdate'].toString();
+        _viewModel = BeregeningData(viewModel: viewModel,lastUpdate: lastupdate);
         notifyListeners(); // Notificeer de UI dat de ViewModel is geüpdatet
       }
     });

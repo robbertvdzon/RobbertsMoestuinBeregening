@@ -161,7 +161,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
             ElevatedButton(
               onPressed: _requestBackendUpdates,
-              child: Text('Laatste status: {viewModel}'),
+              child: Text('Laatste status: ${viewModel?.lastUpdate}'),
             ),
 
               SizedBox(height: 10),
@@ -191,7 +191,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     final time = snapshot.data!;
                     return ElevatedButton(
                       onPressed: _nothing,
-                      child: Text('${getTimeLeft(viewModel)}'),
+                      child: Text('${getTimeLeft(viewModel?.viewModel)}'),
                     );
                   },
                 ),
