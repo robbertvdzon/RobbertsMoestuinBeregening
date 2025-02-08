@@ -10,11 +10,8 @@ import com.vdzon.irrigation.api.log.Log
 import com.vdzon.irrigation.api.model.*
 import com.vdzon.irrigation.api.model.view.ViewModel
 import java.io.File
-import java.time.DayOfWeek
 import java.time.Duration
 import java.time.LocalDateTime
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 
 const val DISABLE_PUMP_TIME_WHILE_CHANGING_AREA = 0L // when the area was changed, disable the pump for 30 seconds
@@ -151,26 +148,21 @@ class ControllerImpl(
     Check once a minute to see if a schedule needs to be started
      */
     private fun startSchedulesThread() {
-        val executor = Executors.newSingleThreadScheduledExecutor()
-        // Calcule the time before the next minute
-        val now = LocalDateTime.now()
-        val nextMinute = now.withSecond(0).withNano(0).plusMinutes(1)
-        val delayInMillis = Duration.between(now, nextMinute).toMillis()
-
-        // Start the check in the first second of every minute
-        executor.scheduleAtFixedRate({
-            try {
-                checkSchedules()
-            }
-            catch (e: Exception){
-                e.printStackTrace()
-            }
-        }, delayInMillis, 60_000, TimeUnit.MILLISECONDS)
+        thread(start = true) {
+            checkSchedules()
+            sleep(1000)
+        }
     }
 
+    var lastMinute: LocalDateTime? = null
     private fun checkSchedules() {
-        val now = Timestamp.now()
+        val thisMinute = Timestamp.now().toLocalDateTime().getTimeOnBeginOfMinute()
+        if (thisMinute == lastMinute) return
+        lastMinute = thisMinute
+
+        log.logInfo("Check schedules")
         // check if a schedule needs to be started
+        val now = Timestamp.fromTime(thisMinute)
         schedules.schedules.forEach { schedule ->
             val nextSchedule = schedule.findFirstSchedule(now)
             if (now == nextSchedule) {
@@ -299,4 +291,9 @@ class ControllerImpl(
         } catch (e: InterruptedException) {
         }
     }
+
+    fun LocalDateTime.getTimeOnBeginOfMinute(): LocalDateTime {
+        return LocalDateTime.of(year, month, dayOfMonth, hour, minute, 0)
+    }
+
 }
