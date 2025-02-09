@@ -230,7 +230,7 @@ class HardwareImpl(
             val currentLine = currentDisplayLines[lineNr]
             val requiredLine = requiredDisplayLines[lineNr]
             if (currentLine != requiredLine) {
-                val line = requiredLine ?: ""
+                val line = (requiredLine ?: "").take(20)
                 lcd.displayText(line, lineNr)
                 currentDisplayLines[lineNr] = requiredLine
             }
