@@ -163,26 +163,36 @@ class ControllerImpl(
         log.logInfo("Check schedules")
         // check if a schedule needs to be started
         val now = Timestamp.fromTime(thisMinute)
+        log.logInfo("Check schedule at $now")
+        // check if a schedule needs to be started
         schedules.schedules.forEach { schedule ->
             val nextSchedule = schedule.findFirstSchedule(now)
+            log.logInfo(" - check  schedule for $nextSchedule")
             if (now == nextSchedule) {
+                log.logInfo(" - schedule found!")
                 val currentTime = LocalDateTime.now()
                 val closeTime = currentTime
                     .plusMinutes(schedule.duration.toLong())
                 requestedState.closeTime = closeTime
                 requestedState.irrigationArea = schedule.area
+                log.logInfo(" - change closetime to $closeTime")
                 saveState()
+            } else {
+                log.logInfo("- No")
             }
         }
+        log.logInfo("Check chedules to remove")
         // check if a schedule needs to be removed
         val schedulesToRemove = schedules.schedules.filter {
             it.endDate != null &&
                     it.endDate.isBefore(now)
         }
         if (schedulesToRemove.isNotEmpty()) {
+            log.logInfo("Remove $schedulesToRemove")
             schedules.schedules.removeAll(schedulesToRemove)
             saveSchedule()
         }
+        log.logInfo("Check chedules done")
     }
 
     private fun ensurePumpState() {
