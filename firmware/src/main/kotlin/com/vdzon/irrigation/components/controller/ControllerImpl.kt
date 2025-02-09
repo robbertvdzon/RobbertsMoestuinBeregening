@@ -144,16 +144,23 @@ class ControllerImpl(
         }
     }
 
-    /*
-    Check once a minute to see if a schedule needs to be started
-     */
     private fun startSchedulesThread() {
         thread(start = true) {
-            checkSchedules()
-            sleep(1000)
+            while (true) {
+                try {
+                    checkSchedules()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    log.logError(e.message)
+                }
+                sleep(1000)
+            }
         }
     }
 
+    /*
+    Check once a minute to see if a schedule needs to be started
+     */
     var lastMinute: LocalDateTime? = null
     private fun checkSchedules() {
         val thisMinute = Timestamp.now().toLocalDateTime().getTimeOnBeginOfMinute()
