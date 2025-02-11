@@ -12,9 +12,11 @@ import com.vdzon.irrigation.api.model.view.ViewModel
 import java.io.File
 import java.time.Duration
 import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import kotlin.concurrent.thread
 
-const val DISABLE_PUMP_TIME_WHILE_CHANGING_AREA = 0L // when the area was changed, disable the pump for 30 seconds
+const val DISABLE_PUMP_TIME_WHILE_CHANGING_AREA = 30L // when the area was changed, disable the pump for 30 seconds
 
 class ControllerImpl(
     private val hardware: Hardware,
@@ -27,6 +29,8 @@ class ControllerImpl(
     private var currentIP: String = "Unknown"
     private var disablePumpUntil = LocalDateTime.now() // when the area was changed, disable the pump for 30 seconds
     private var lastKnownIrrigationArea: IrrigationArea? = null
+    private val formatter = DateTimeFormatter.ofPattern("HH:mm:ss")
+
 
     override fun start() {
         requestedState = loadState()
@@ -35,6 +39,7 @@ class ControllerImpl(
             updateHardwareThread()
         }
         startSchedulesThread()
+        startLogPumpUsageThread()
     }
 
     override fun onButtonClick(button: Button) {
@@ -158,6 +163,26 @@ class ControllerImpl(
         }
     }
 
+    private fun startLogPumpUsageThread() {
+        thread(start = true) {
+            while (true) {
+                try {
+                    val now = LocalDateTime.now()
+                    val pumpIsOpen = requestedState.closeTime.isAfter(now)
+                    // on every 5 minute: when the pump is open, register this at firebase
+                    if (now.minute % 5 == 0 && pumpIsOpen) {
+                        log.logInfo("Log pump time")
+                        firebaseProducer.logPumpUsage()
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    log.logError(e.message)
+                }
+                sleep(1000 * 60)// sleep 1 minute
+            }
+        }
+    }
+
     /*
     Check once a minute to see if a schedule needs to be started
      */
@@ -225,7 +250,6 @@ class ControllerImpl(
         }
     }
 
-
     private fun ensureIrrigationAreState() {
         if (lastKnownIrrigationArea != requestedState.irrigationArea) {
             disablePumpUntil = LocalDateTime.now().plusSeconds(DISABLE_PUMP_TIME_WHILE_CHANGING_AREA)
@@ -237,13 +261,21 @@ class ControllerImpl(
     }
 
     private fun updateDisplay() {
-        val pumpDisabled = LocalDateTime.now().isBefore(disablePumpUntil)
+        val now = LocalDateTime.now()
+        val pumpDisabled = now.isBefore(disablePumpUntil)
         val changeAreText = if (pumpDisabled) "(WISSEL)" else ""
         val aliveChar = getAliveChar()
-        hardware.displayLine(1, "$currentIP $aliveChar")
+        val time = now.format(formatter)
+        val firstLine = if (isInFirstFiveSecondsRange(now.toLocalTime())) "$currentIP $aliveChar" else time
+        hardware.displayLine(1, firstLine)
         hardware.displayLine(2, "${requestedState.irrigationArea.name} $changeAreText")
         hardware.displayLine(3, "${getNextSchedule()}")
         hardware.displayLine(4, "${getTimerTime()}")
+    }
+
+    fun isInFirstFiveSecondsRange(time: LocalTime): Boolean {
+        val seconds = time.second
+        return seconds % 10 in 0..4
     }
 
     private fun getNextSchedule(): String {
@@ -295,6 +327,7 @@ class ControllerImpl(
             ipAddress = currentIP,
             pumpStatus = if (closeTimeInFuture) PumpStatus.OPEN else PumpStatus.CLOSE,
             currentIrrigationArea = requestedState.irrigationArea,
+            valveStatus = if (closeTimeInFuture) ValveStatus.MOVING else ValveStatus.IDLE,
             pumpingEndTime = Timestamp.fromTime(requestedState.closeTime),
             schedules = schedules.schedules.map { it.toEnrichedSchedule() },
             nextSchedule = getNextSchedule(),

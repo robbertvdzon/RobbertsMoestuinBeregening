@@ -5,4 +5,5 @@ import com.vdzon.irrigation.api.model.view.ViewModel
 interface FirebaseProducer {
     fun cleanLastState()
     fun setState(viewModel: ViewModel)
+    fun logPumpUsage()
 }

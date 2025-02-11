@@ -12,10 +12,11 @@ class FirebaseProducerImpl(
     private val dbFirestore: Firestore?,
     private val collection: String,
     private val document: String,
+    private val logDocument: String,
     private val objectMapper: ObjectMapper
 ) : FirebaseProducer {
     private var lastViewModel: ViewModel? = null
-    private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+    private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
 
     override fun cleanLastState() {
         lastViewModel = null
@@ -29,5 +30,12 @@ class FirebaseProducerImpl(
         documentRef?.set(mapOf("viewModel" to jsonModel), SetOptions.merge())
         documentRef?.set(mapOf("lastupdate" to updateDateTime), SetOptions.merge())
         lastViewModel = viewModel
+    }
+
+    override fun logPumpUsage() {
+        val updateDateTime = LocalDateTime.now().format(formatter)
+        val documentRef = dbFirestore?.collection(collection)?.document(logDocument)
+        documentRef?.set(mapOf(updateDateTime to updateDateTime), SetOptions.merge())
+
     }
 }
