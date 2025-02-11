@@ -30,6 +30,7 @@ class ViewModel {
   final String ipAddress;
   final PumpStatus pumpStatus;
   final IrrigationArea currentIrrigationArea;
+  final ValveStatus valveStatus;
   final Timestamp pumpingEndTime;
   final List<EnrichedSchedule> schedules;
   final String nextSchedule;
@@ -38,10 +39,22 @@ class ViewModel {
     required this.ipAddress,
     required this.pumpStatus,
     required this.currentIrrigationArea,
+    required this.valveStatus,
     required this.pumpingEndTime,
     required this.schedules,
     required this.nextSchedule,
   });
+
+  String get valveState{
+    if (valveStatus==ValveStatus.IDLE){
+      return currentIrrigationArea.name;
+    }
+    if (currentIrrigationArea==IrrigationArea.MOESTUIN){
+      return IrrigationArea.GAZON.name+" --> "+IrrigationArea.MOESTUIN.name;
+    }
+    return IrrigationArea.MOESTUIN.name+" --> "+IrrigationArea.GAZON.name;
+
+  }
 
   // Factory method for JSON deserialization
   factory ViewModel.fromJson(Map<String, dynamic> json) =>
@@ -57,6 +70,9 @@ enum PumpStatus { OPEN, CLOSE }
 
 // Enum for IrrigationArea
 enum IrrigationArea { MOESTUIN, GAZON }
+
+// Enum for ValveStatus
+enum ValveStatus { IDLE, MOVING }
 
 // Timestamp class
 @JsonSerializable()

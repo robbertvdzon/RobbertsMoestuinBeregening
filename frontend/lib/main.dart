@@ -159,6 +159,8 @@ class _MyHomePageState extends State<MyHomePage> {
               SizedBox(height: 10),
               Text('Laatste status: ${beregeningData?.lastUpdate}'),
               SizedBox(height: 10),
+              Text('Area: ${beregeningData?.viewModel.valveState}'),
+              SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 // Centreer de widgets horizontaal

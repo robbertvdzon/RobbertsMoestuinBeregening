@@ -322,12 +322,14 @@ class ControllerImpl(
     }
 
     private fun updateFirebase() {
-        val closeTimeInFuture = requestedState.closeTime.isAfter(LocalDateTime.now())
+        val now = LocalDateTime.now()
+        val closeTimeInFuture = requestedState.closeTime.isAfter(now)
+        val areaIsMoving = now.isBefore(disablePumpUntil)
         val viewModel = ViewModel(
             ipAddress = currentIP,
             pumpStatus = if (closeTimeInFuture) PumpStatus.OPEN else PumpStatus.CLOSE,
             currentIrrigationArea = requestedState.irrigationArea,
-            valveStatus = if (closeTimeInFuture) ValveStatus.MOVING else ValveStatus.IDLE,
+            valveStatus = if (areaIsMoving) ValveStatus.MOVING else ValveStatus.IDLE,
             pumpingEndTime = Timestamp.fromTime(requestedState.closeTime),
             schedules = schedules.schedules.map { it.toEnrichedSchedule() },
             nextSchedule = getNextSchedule(),
