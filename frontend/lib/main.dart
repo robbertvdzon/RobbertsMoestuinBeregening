@@ -154,13 +154,12 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Column(
             // mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
+              Text('Laatste status update: ${beregeningData?.lastUpdate}'),
               SizedBox(height: 270),
-              Text('Volgende planning: ${beregeningData?.viewModel.nextSchedule}'),
-              SizedBox(height: 10),
-              Text('Laatste status: ${beregeningData?.lastUpdate}'),
-              SizedBox(height: 10),
-              Text('Area: ${beregeningData?.viewModel.valveState}'),
-              SizedBox(height: 10),
+
+
+
+// Controller
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 // Centreer de widgets horizontaal
@@ -189,7 +188,6 @@ class _MyHomePageState extends State<MyHomePage> {
                       );
                     },
                   ),
-
                   ElevatedButton(
                     onPressed: () => _addCommand("UPDATE_IRRIGATION_TIME,30"),
                     child: Text('+30'),
@@ -202,6 +200,14 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ],
               ),
+
+
+
+
+              // AREA
+              SizedBox(height: 10),
+              Text('Area: ${beregeningData?.viewModel.valveState}'),
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 // Centreer de widgets horizontaal
@@ -216,6 +222,13 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ],
               ),
+
+
+
+
+// PLANNING
+              Text('Volgende planning: ${beregeningData?.viewModel.nextSchedule}'),
+              SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 // Centreer de widgets horizontaal
@@ -233,6 +246,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ],
               ),
+
+
+
+
             ],
           ),
         ),
