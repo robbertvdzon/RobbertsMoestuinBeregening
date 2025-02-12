@@ -14,6 +14,7 @@ import com.vdzon.irrigation.components.hardware.HardwareImpl
 import com.vdzon.irrigation.components.hardwaresimulation.HardwareSimulation
 import com.vdzon.irrigation.components.log.LogImpl
 import com.vdzon.irrigation.components.network.NetworkImpl
+import com.vdzon.irrigation.components.pumplog.PumpLogImpl
 
 object Main {
 
@@ -42,6 +43,7 @@ object Main {
         val firebaseProducer = FirebaseProducerImpl(dbFirestore, COLLECTION, STATUS_DOCUMENT, PUMP_LOG_DOCUMENT, objectMapper)
         val controller: Controller = ControllerImpl(hardware, firebaseProducer, log, objectMapper)
         val commandProcessor = BewateringCommandProcessor(log)
+        val pumpLog = PumpLogImpl(firebaseProducer, log, objectMapper, controller)
         val firebaseListener = FirebaseListener(COLLECTION, COMMANDS_DOCUMENT, commandProcessor, log)
 
         firebaseListener.processCommands(dbFirestore)
@@ -51,6 +53,7 @@ object Main {
         hardware.start()
         network.start()
         controller.start()
+        pumpLog.start()
     }
 
 

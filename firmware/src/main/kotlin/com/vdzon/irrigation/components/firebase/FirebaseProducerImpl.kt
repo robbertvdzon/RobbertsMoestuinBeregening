@@ -4,7 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.cloud.firestore.Firestore
 import com.google.cloud.firestore.SetOptions
 import com.vdzon.irrigation.api.firebase.FirebaseProducer
+import com.vdzon.irrigation.api.firebase.FirestoreNotInitialized
+import com.vdzon.irrigation.api.firebase.FirestoreSnapshotNotFound
+import com.vdzon.irrigation.api.model.IrrigationArea
 import com.vdzon.irrigation.api.model.view.ViewModel
+import com.vdzon.irrigation.api.pumplog.PumpLogState
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -17,6 +21,7 @@ class FirebaseProducerImpl(
 ) : FirebaseProducer {
     private var lastViewModel: ViewModel? = null
     private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+    private val yearMonthFormatter = DateTimeFormatter.ofPattern("yyyy-MM")
 
     override fun cleanLastState() {
         lastViewModel = null
@@ -32,10 +37,28 @@ class FirebaseProducerImpl(
         lastViewModel = viewModel
     }
 
-    override fun logPumpUsage() {
-        val updateDateTime = LocalDateTime.now().format(formatter)
-        val documentRef = dbFirestore?.collection(collection)?.document(logDocument)
-        documentRef?.set(mapOf(updateDateTime to updateDateTime), SetOptions.merge())
-
+    override fun getPumpUsage(area: IrrigationArea): PumpLogState? {
+        val documentRef = dbFirestore?.collection(collection)?.document(logDocument) ?: throw FirestoreNotInitialized()
+        val snapshot = documentRef.get().get() ?: throw FirestoreSnapshotNotFound()
+        val data = snapshot.data ?: emptyMap()
+        val key = logKey(area)
+        val pumpLogStateJson = data[key] ?: return null
+        return objectMapper.readValue(pumpLogStateJson.toString(), PumpLogState::class.java)
     }
+
+
+    override fun setPumpUsage(pumpLogState: PumpLogState, area: IrrigationArea) {
+        val key = logKey(area)
+        val documentRef = dbFirestore?.collection(collection)?.document(logDocument)
+        val jsonModel = objectMapper.writeValueAsString(pumpLogState)
+        documentRef?.set(mapOf(key to jsonModel), SetOptions.merge())
+    }
+
+    private fun logKey(area: IrrigationArea): String {
+        val now = LocalDateTime.now()
+        val yearMonth = now.format(yearMonthFormatter)
+        val key = "$yearMonth ${area.name}"
+        return key
+    }
+
 }

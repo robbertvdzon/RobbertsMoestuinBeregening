@@ -39,7 +39,10 @@ class ControllerImpl(
             updateHardwareThread()
         }
         startSchedulesThread()
-        startLogPumpUsageThread()
+    }
+
+    override fun getCurrentState(): State {
+        return requestedState
     }
 
     override fun onButtonClick(button: Button) {
@@ -159,26 +162,6 @@ class ControllerImpl(
                     log.logError(e.message)
                 }
                 sleep(1000)
-            }
-        }
-    }
-
-    private fun startLogPumpUsageThread() {
-        thread(start = true) {
-            while (true) {
-                try {
-                    val now = LocalDateTime.now()
-                    val pumpIsOpen = requestedState.closeTime.isAfter(now)
-                    // on every 5 minute: when the pump is open, register this at firebase
-                    if (now.minute % 5 == 0 && pumpIsOpen) {
-                        log.logInfo("Log pump time")
-                        firebaseProducer.logPumpUsage()
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    log.logError(e.message)
-                }
-                sleep(1000 * 60)// sleep 1 minute
             }
         }
     }
