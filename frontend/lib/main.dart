@@ -188,21 +188,15 @@ class _MyHomePageState extends State<MyHomePage> {
                           children: <Widget>[
                             ElevatedButton(
                               onPressed: () =>
-                                  _addCommand("UPDATE_IRRIGATION_TIME,-5"),
-                              child: Text('-5'),
-                            ),
-                            ElevatedButton(
-                              onPressed: () =>
                                   _addCommand("UPDATE_IRRIGATION_TIME,-30"),
                               child: Text('-30'),
                             ),
                             SizedBox(width: 10),
                             // Voeg een beetje ruimte tussen de widgets
-
                             ElevatedButton(
                               onPressed: () =>
-                                  _addCommand("UPDATE_IRRIGATION_TIME,30"),
-                              child: Text('+30'),
+                                  _addCommand("UPDATE_IRRIGATION_TIME,-5"),
+                              child: Text('-5'),
                             ),
                             SizedBox(width: 10),
                             // Voeg een beetje ruimte tussen de widgets
@@ -210,6 +204,13 @@ class _MyHomePageState extends State<MyHomePage> {
                               onPressed: () =>
                                   _addCommand("UPDATE_IRRIGATION_TIME,5"),
                               child: Text('+5'),
+                            ),
+                            SizedBox(width: 10),
+                            // Voeg een beetje ruimte tussen de widgets
+                            ElevatedButton(
+                              onPressed: () =>
+                                  _addCommand("UPDATE_IRRIGATION_TIME,30"),
+                              child: Text('+30'),
                             ),
                           ],
                         ),
@@ -273,7 +274,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                       Schedules(title: 'Planning')),
                             );
                           },
-                          child: Text('Planning'),
+                          child: Text('Open planning'),
                         ),
                       ],
                     ),
