@@ -39,7 +39,7 @@ class PumpLogImpl(
                     val oldLogState = firebaseProducer.getPumpUsage(area) ?: PumpLogState(0, emptyList())
                     val updatedLogState = PumpLogState(
                         minutes = oldLogState.minutes + 5,
-                        log = oldLogState.log + PumpLogItem(now.hour, now.minute)
+                        log = oldLogState.log + PumpLogItem.getNewLogItem()
                     )
                     firebaseProducer.setPumpUsage(updatedLogState, area)
                 }
