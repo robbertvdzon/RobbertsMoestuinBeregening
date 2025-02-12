@@ -252,7 +252,7 @@ class ControllerImpl(
         val firstLine = if (isInFirstFiveSecondsRange(now.toLocalTime())) "$currentIP $aliveChar" else time
         hardware.displayLine(1, firstLine)
         hardware.displayLine(2, "${requestedState.irrigationArea.name} $changeAreText")
-        hardware.displayLine(3, "${getNextSchedule()}")
+        hardware.displayLine(3, "${getNextSchedule(withDuration = false)}")
         hardware.displayLine(4, "${getTimerTime()}")
     }
 
@@ -261,14 +261,14 @@ class ControllerImpl(
         return seconds % 10 in 0..4
     }
 
-    private fun getNextSchedule(): String {
+    private fun getNextSchedule(withDuration: Boolean): String {
         val now = Timestamp.now()
         val nextSchudules = schedules
             .schedules
             .filter { it.findFirstSchedule(now) != null }
             .filter { it.findFirstSchedule(now) != now }
             .sortedBy { it.findFirstSchedule(now)?.toEpochSecond() ?: Long.MAX_VALUE }
-        val firstSchedule = nextSchudules.firstOrNull()
+        val firstSchedule: Schedule? = nextSchudules.firstOrNull()
         val firstTimestamp = firstSchedule?.findFirstSchedule(now)
         if (firstTimestamp == null) return "Geen planning"
 
@@ -277,7 +277,10 @@ class ControllerImpl(
         val minute = if (firstTimestamp.minute < 10) "0${firstTimestamp.minute}" else "${firstTimestamp.minute}"
         val area = mapArea(firstSchedule.area)
         val time = "$hour:$minute"
-        return "$dayOfWeek$time, $area"
+        if (withDuration)
+            return "$dayOfWeek$time, $area, ${firstSchedule.duration} minuten"
+        else
+            return "$dayOfWeek$time, $area"
     }
 
     private fun mapArea(area: IrrigationArea) = when (area) {
@@ -315,7 +318,7 @@ class ControllerImpl(
             valveStatus = if (areaIsMoving) ValveStatus.MOVING else ValveStatus.IDLE,
             pumpingEndTime = Timestamp.fromTime(requestedState.closeTime),
             schedules = schedules.schedules.map { it.toEnrichedSchedule() },
-            nextSchedule = getNextSchedule(),
+            nextSchedule = getNextSchedule(withDuration = true),
         )
         firebaseProducer.setState(viewModel)
     }

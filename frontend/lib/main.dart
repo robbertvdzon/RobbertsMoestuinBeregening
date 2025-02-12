@@ -90,7 +90,9 @@ class _MyHomePageState extends State<MyHomePage> {
         );
       }
     }
-    return timeLeft;
+    String disabledText = "";
+    if (viewModelCopy?.valveStatus==ValveStatus.MOVING) disabledText = "(aan het wisselen)";
+    return timeLeft+" "+disabledText;
   }
 
   @override
@@ -157,103 +159,147 @@ class _MyHomePageState extends State<MyHomePage> {
               Text('Laatste status update: ${beregeningData?.lastUpdate}'),
               SizedBox(height: 270),
 
-
-
 // Controller
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                // Centreer de widgets horizontaal
-                children: <Widget>[
-                  ElevatedButton(
-                    onPressed: () => _addCommand("UPDATE_IRRIGATION_TIME,-5"),
-                    child: Text('-5'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => _addCommand("UPDATE_IRRIGATION_TIME,-30"),
-                    child: Text('-30'),
-                  ),
-                  SizedBox(width: 10),
-                  // Voeg een beetje ruimte tussen de widgets
+              Container(
+                margin: EdgeInsets.all(10), // Marges rond het blok
+                padding: EdgeInsets.all(15), // Binnenruimte binnen het blok
+                decoration: buildBoxDecoration(),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min, // Minimaliseer de hoogte
+                  children: [
+                    StreamBuilder<String>(
+                      stream: _timeStream,
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return CircularProgressIndicator();
+                        }
+                        return Text(
+                            'Timer: ${getTimeLeft(beregeningData?.viewModel)}');
+                      },
+                    ),
+                    SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      // Centreer de widgets horizontaal
+                      children: <Widget>[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          // Centreer de widgets horizontaal
+                          children: <Widget>[
+                            ElevatedButton(
+                              onPressed: () =>
+                                  _addCommand("UPDATE_IRRIGATION_TIME,-5"),
+                              child: Text('-5'),
+                            ),
+                            ElevatedButton(
+                              onPressed: () =>
+                                  _addCommand("UPDATE_IRRIGATION_TIME,-30"),
+                              child: Text('-30'),
+                            ),
+                            SizedBox(width: 10),
+                            // Voeg een beetje ruimte tussen de widgets
 
-                  StreamBuilder<String>(
-                    stream: _timeStream,
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData) {
-                        return CircularProgressIndicator();
-                      }
-                      final time = snapshot.data!;
-                      return ElevatedButton(
-                        onPressed: _nothing,
-                        child: Text('${getTimeLeft(beregeningData?.viewModel)}'),
-                      );
-                    },
-                  ),
-                  ElevatedButton(
-                    onPressed: () => _addCommand("UPDATE_IRRIGATION_TIME,30"),
-                    child: Text('+30'),
-                  ),
-                  SizedBox(width: 10),
-                  // Voeg een beetje ruimte tussen de widgets
-                  ElevatedButton(
-                    onPressed: () => _addCommand("UPDATE_IRRIGATION_TIME,5"),
-                    child: Text('+5'),
-                  ),
-                ],
+                            ElevatedButton(
+                              onPressed: () =>
+                                  _addCommand("UPDATE_IRRIGATION_TIME,30"),
+                              child: Text('+30'),
+                            ),
+                            SizedBox(width: 10),
+                            // Voeg een beetje ruimte tussen de widgets
+                            ElevatedButton(
+                              onPressed: () =>
+                                  _addCommand("UPDATE_IRRIGATION_TIME,5"),
+                              child: Text('+5'),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-
-
-
 
               // AREA
-              SizedBox(height: 10),
-              Text('Area: ${beregeningData?.viewModel.valveState}'),
 
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                // Centreer de widgets horizontaal
-                children: <Widget>[
-                  ElevatedButton(
-                    onPressed: () => _addCommand("CHANGE_AREA,GAZON"),
-                    child: Text('Gazon'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => _addCommand("CHANGE_AREA,MOESTUIN"),
-                    child: Text('Moestuin'),
-                  ),
-                ],
+              Container(
+                margin: EdgeInsets.all(10), // Marges rond het blok
+                padding: EdgeInsets.all(15), // Binnenruimte binnen het blok
+                decoration: buildBoxDecoration(),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min, // Minimaliseer de hoogte
+                  children: [
+                    SizedBox(height: 10),
+                    Text('Beregeningsgebied: ${beregeningData?.viewModel.valveState}'),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        ElevatedButton(
+                          onPressed: () => _addCommand("CHANGE_AREA,GAZON"),
+                          child: Text('Gazon'),
+                        ),
+                        SizedBox(width: 10), // Ruimte tussen de knoppen
+                        ElevatedButton(
+                          onPressed: () => _addCommand("CHANGE_AREA,MOESTUIN"),
+                          child: Text('Moestuin'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-
-
-
 
 // PLANNING
-              Text('Volgende planning: ${beregeningData?.viewModel.nextSchedule}'),
-              SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                // Centreer de widgets horizontaal
-                children: <Widget>[
-                  ElevatedButton(
-                    onPressed: () {
-                      // Navigeren naar SecondPage
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => Schedules(title: 'Planning')),
-                      );
-                    },
-                    child: Text('Planning'),
-                  ),
-                ],
+              Container(
+                margin: EdgeInsets.all(10), // Marges rond het blok
+                padding: EdgeInsets.all(15), // Binnenruimte binnen het blok
+                decoration: buildBoxDecoration(),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min, // Minimaliseer de hoogte
+                  children: [
+                    Text(
+                        'Volgende planning: ${beregeningData?.viewModel.nextSchedule}'),
+                    SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      // Centreer de widgets horizontaal
+                      children: <Widget>[
+                        ElevatedButton(
+                          onPressed: () {
+                            // Navigeren naar SecondPage
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      Schedules(title: 'Planning')),
+                            );
+                          },
+                          child: Text('Planning'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-
-
-
-
             ],
           ),
         ),
       ),
+    );
+  }
+
+  BoxDecoration buildBoxDecoration() {
+    return BoxDecoration(
+      color: Colors.white.withOpacity(0.8),
+      // Witte achtergrond met 50% transparantie
+      borderRadius: BorderRadius.circular(15),
+      // Afgeronde hoeken
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.4), // Optionele schaduw
+          blurRadius: 10,
+          offset: Offset(0, 5),
+        ),
+      ],
     );
   }
 

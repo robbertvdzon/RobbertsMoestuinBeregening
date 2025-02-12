@@ -47,13 +47,18 @@ class ViewModel {
 
   String get valveState{
     if (valveStatus==ValveStatus.IDLE){
-      return currentIrrigationArea.name;
+      return getReadableName(currentIrrigationArea);
     }
     if (currentIrrigationArea==IrrigationArea.MOESTUIN){
-      return IrrigationArea.GAZON.name+" --> "+IrrigationArea.MOESTUIN.name;
+      return getReadableName(IrrigationArea.GAZON)+" --> "+getReadableName(IrrigationArea.MOESTUIN);
     }
-    return IrrigationArea.MOESTUIN.name+" --> "+IrrigationArea.GAZON.name;
+    return getReadableName(IrrigationArea.MOESTUIN)+" --> "+getReadableName(IrrigationArea.GAZON);
 
+  }
+
+  String getReadableName(IrrigationArea area){
+    if (area==IrrigationArea.MOESTUIN) return "Moestuin";
+    return "Gazon";
   }
 
   // Factory method for JSON deserialization
