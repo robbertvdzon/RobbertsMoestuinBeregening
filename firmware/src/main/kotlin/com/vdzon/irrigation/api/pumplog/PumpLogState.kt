@@ -2,6 +2,36 @@ package com.vdzon.irrigation.api.pumplog
 
 import java.time.LocalDateTime
 
+data class SummaryPumpUsage(
+    var minutesGazon: Int = 0,
+    var minutesMoestuin: Int = 0,
+    val years: MutableList<SummaryYearPumpUsage> = mutableListOf()
+)
+
+data class SummaryYearPumpUsage(
+    var year: Int,
+    var minutesGazon: Int = 0,
+    var minutesMoestuin: Int = 0,
+    val months: MutableList<SummaryMonthsPumpUsage> = mutableListOf()
+)
+
+data class SummaryMonthsPumpUsage(
+    var year: Int,
+    var month: Int,
+    var minutesGazon: Int = 0,
+    var minutesMoestuin: Int = 0,
+    val days: MutableList<SummaryDaysPumpUsage> = mutableListOf()
+)
+
+data class SummaryDaysPumpUsage(
+    var year: Int,
+    var month: Int,
+    var day: Int,
+    var minutesGazon: Int = 0,
+    var minutesMoestuin: Int = 0,
+)
+
+
 data class PumpLogState(
     val minutes: Int,
     val log: List<PumpLogItem>

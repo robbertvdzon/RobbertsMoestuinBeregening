@@ -9,6 +9,7 @@ import com.vdzon.irrigation.api.firebase.FirestoreSnapshotNotFound
 import com.vdzon.irrigation.api.model.IrrigationArea
 import com.vdzon.irrigation.api.model.view.ViewModel
 import com.vdzon.irrigation.api.pumplog.PumpLogState
+import com.vdzon.irrigation.api.pumplog.SummaryPumpUsage
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -17,6 +18,7 @@ class FirebaseProducerImpl(
     private val collection: String,
     private val document: String,
     private val logDocument: String,
+    private val summaryDocument: String,
     private val objectMapper: ObjectMapper
 ) : FirebaseProducer {
     private var lastViewModel: ViewModel? = null
@@ -37,17 +39,18 @@ class FirebaseProducerImpl(
         lastViewModel = viewModel
     }
 
-    override fun getPumpUsage(area: IrrigationArea): PumpLogState? {
+    override fun getMonthlyPumpUsage(area: IrrigationArea): PumpLogState? {
         val documentRef = dbFirestore?.collection(collection)?.document(logDocument) ?: throw FirestoreNotInitialized()
         val snapshot = documentRef.get().get() ?: throw FirestoreSnapshotNotFound()
         val data = snapshot.data ?: emptyMap()
         val key = logKey(area)
         val pumpLogStateJson = data[key] ?: return null
-        return objectMapper.readValue(pumpLogStateJson.toString(), PumpLogState::class.java)
+        val readValue = objectMapper.readValue(pumpLogStateJson.toString(), PumpLogState::class.java)
+        return readValue
     }
 
 
-    override fun setPumpUsage(pumpLogState: PumpLogState, area: IrrigationArea) {
+    override fun setMonthlyPumpUsage(pumpLogState: PumpLogState, area: IrrigationArea) {
         val key = logKey(area)
         val documentRef = dbFirestore?.collection(collection)?.document(logDocument)
         val jsonModel = objectMapper.writeValueAsString(pumpLogState)
@@ -60,5 +63,22 @@ class FirebaseProducerImpl(
         val key = "$yearMonth ${area.name}"
         return key
     }
+
+    override fun getSummaryPumpUsage(): SummaryPumpUsage? {
+        val documentRef = dbFirestore?.collection(collection)?.document(summaryDocument) ?: throw FirestoreNotInitialized()
+        val snapshot = documentRef.get().get() ?: throw FirestoreSnapshotNotFound()
+        val data = snapshot.data ?: emptyMap()
+        val summaryPumpLogUsage = data["summary"] ?: return null
+        return objectMapper.readValue(summaryPumpLogUsage.toString(), SummaryPumpUsage::class.java)
+    }
+
+    override fun setSummaryPumpUsage(totalPumpLogState: SummaryPumpUsage) {
+        val documentRef = dbFirestore?.collection(collection)?.document(summaryDocument)
+        val jsonModel = objectMapper.writeValueAsString(totalPumpLogState)
+        documentRef?.set(mapOf("summary" to jsonModel), SetOptions.merge())
+
+
+    }
+
 
 }
