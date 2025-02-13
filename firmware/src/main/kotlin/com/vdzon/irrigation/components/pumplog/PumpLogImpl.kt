@@ -58,7 +58,6 @@ class PumpLogImpl(
                         val daySummary = monthSummary.days.firstOrNull{it.year==now.year && it.month==month && it.day==day}?: SummaryDaysPumpUsage(year, month, day)
                         summary.years.remove(yearSummary)
                         yearSummary.months.remove(monthSummary)
-                        monthSummary.days.remove(daySummary)
                     if (area==IrrigationArea.MOESTUIN){
                         yearSummary.minutesMoestuin+=5
                         monthSummary.minutesMoestuin+=5
@@ -73,7 +72,6 @@ class PumpLogImpl(
                     }
                     summary.years.add(yearSummary)
                     yearSummary.months.add(monthSummary)
-                    monthSummary.days.add(daySummary)
                     firebaseProducer.setSummaryPumpUsage(summary)
                 }
             } catch (e: FirestoreNotInitialized) {
