@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tuinsproeiersweb/summarymodel.dart';
+import 'package:intl/intl.dart';
 
 class SummaryMonthRow extends StatefulWidget {
   final SummaryMonthsPumpUsage monthPumpUsage;
@@ -34,31 +35,34 @@ class _SummaryMonthRowState extends State<SummaryMonthRow> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Text('${widget.monthPumpUsage.year}-${widget.monthPumpUsage.month}'),
-                const SizedBox(width: 8),
-                Text('Gazon: ${widget.monthPumpUsage.minutesGazon}'),
-                const SizedBox(width: 8),
-                Text('Moestuin: ${widget.monthPumpUsage.minutesMoestuin}'),
-                ElevatedButton(
-                  onPressed: () =>
-                      _handleClick(),
-                  child: Text('meer...'),
-                ),
-              ],
+    return GestureDetector(
+        onTap: () {
+          // Functie aanroepen bij klikken op de Row
+          _handleClick();
+        },
+        child: Row(
+            children: [
+              Text('${getMonthName(widget.monthPumpUsage.month)} ${widget.monthPumpUsage.year} :'),
+              const SizedBox(width: 8),
+              Text('Gazon: ${widget.monthPumpUsage.minutesGazon} min'),
+              const SizedBox(width: 8),
+              Text('Moestuin: ${widget.monthPumpUsage.minutesMoestuin} min'),
+            ]
 
-            ),
-          ],
-        ),
-      ),
+        )
     );
+
+  }
+  String getMonthName(int month) {
+    const months = [
+      'jan', 'feb', 'mrt', 'apr', 'mei', 'jun',
+      'jul', 'aug', 'sep', 'okt', 'nov', 'dec'
+    ];
+
+    if (month < 1 || month > 12) {
+      throw ArgumentError('Maand moet tussen 1 en 12 liggen.');
+    }
+
+    return months[month - 1];
   }
 }

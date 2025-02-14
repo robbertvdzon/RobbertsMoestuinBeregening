@@ -33,80 +33,21 @@ class _SummaryYearRowState extends State<SummaryYearRow> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return GestureDetector(
+        onTap: () {
+          // Functie aanroepen bij klikken op de Row
+          _handleClick();
+        },
+        child: Row(
           children: [
-            Row(
-              children: [
-                Text('${widget.yearPumpUsage.year}'),
-                const SizedBox(width: 8),
-                Text('Gazon: ${widget.yearPumpUsage.minutesGazon}'),
-                const SizedBox(width: 8),
-                Text('Moestuin: ${widget.yearPumpUsage.minutesMoestuin}'),
-                const SizedBox(height: 8),
-                Text('Moestuin: ${widget.yearPumpUsage.months.length}'),
-                ElevatedButton(
-                  onPressed: () =>
-                      _handleClick(),
-                  child: Text('meer...'),
-                ),
-              ],
+            Text('${widget.yearPumpUsage.year} :'),
+            const SizedBox(width: 8),
+            Text('Gazon: ${widget.yearPumpUsage.minutesGazon} min'),
+            const SizedBox(width: 8),
+            Text('Moestuin: ${widget.yearPumpUsage.minutesMoestuin} min'),
+          ]
 
-            ),
-            // Row(
-            //   children: [
-            //     // De lijst met planningen
-            //     Expanded(
-            //       child: ListView.builder(
-            //         // itemCount: widget.yearPumpUsage.months.length,
-            //         itemCount: 1,
-            //         itemBuilder: (context, index) {
-            //           // final month = widget.yearPumpUsage.months[index];
-            //           return
-            //             Row(
-            //               children: [
-            //                 Text('tss'),
-            //                 // Text('${month.year}-${month.month}'),
-            //                 // const SizedBox(width: 8),
-            //                 // Text('Gazon: ${month.minutesGazon}'),
-            //                 // const SizedBox(width: 8),
-            //                 // Text('Moestuin: ${month.minutesMoestuin}'),
-            //                 // const SizedBox(height: 8),
-            //                 // ElevatedButton(
-            //                 //   onPressed: () =>
-            //                 //       _handleClick(),
-            //                 //   child: Text('meer...'),
-            //                 // ),
-            //               ],
-            //             );
-            //         },
-            //       ),
-            //     ),
-            //   ],
-            // )
-
-            // Row(
-            //   children: [
-            //     // De lijst met planningen
-            //     Expanded(
-            //       child: ListView.builder(
-            //         // itemCount: widget.yearPumpUsage.months.length,
-            //         itemCount: 1,
-            //         itemBuilder: (context, index) {
-            //           // final month = widget.yearPumpUsage.months[index];
-            //           return Text('tss');
-            //         },
-            //       ),
-            //     ),
-            //   ],
-            // )
-          ],
-        ),
-      ),
+        )
     );
   }
 }

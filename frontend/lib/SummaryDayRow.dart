@@ -25,29 +25,15 @@ class _SummaryDayRowState extends State<SummaryDayRow> {
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Text('${widget.dayPumpUsage.year}-${widget.dayPumpUsage.month}-${widget.dayPumpUsage.day}'),
-                const SizedBox(width: 8),
-                Text('Gazon: ${widget.dayPumpUsage.minutesGazon}'),
-                const SizedBox(width: 8),
-                Text('Moestuin: ${widget.dayPumpUsage.minutesMoestuin}'),
-              ],
-
-            ),
-          ],
-        ),
-      ),
-    );
+    return Row(children: [
+      Text(
+          '${widget.dayPumpUsage.day}-${widget.dayPumpUsage.month}-${widget.dayPumpUsage.year} :'),
+      const SizedBox(width: 8),
+      Text('Gazon: ${widget.dayPumpUsage.minutesGazon} min'),
+      const SizedBox(width: 8),
+      Text('Moestuin: ${widget.dayPumpUsage.minutesMoestuin} min'),
+    ]);
   }
 }

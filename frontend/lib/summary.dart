@@ -33,7 +33,7 @@ class _SummaryState extends State<Summary> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Planning'),
+        title: const Text('Log'),
       ),
       body: summaryPumpUsage == null
           ? Center(child: CircularProgressIndicator())
