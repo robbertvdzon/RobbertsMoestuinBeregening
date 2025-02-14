@@ -3,7 +3,7 @@ import 'package:tuinsproeiersweb/summarymodel.dart';
 
 class SummaryYearRow extends StatefulWidget {
   final SummaryYearPumpUsage yearPumpUsage;
-  final Function(int year) onClick;
+  final Function() onClick;
 
   const SummaryYearRow({
     Key? key,
@@ -28,8 +28,7 @@ class _SummaryYearRowState extends State<SummaryYearRow> {
   }
 
   void _handleClick() {
-    widget.onClick(widget.yearPumpUsage.year);
-    // Navigator.pop(context);
+    widget.onClick();
   }
 
   @override
