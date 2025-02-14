@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tuinsproeiersweb/summaryMonth.dart';
 import 'package:tuinsproeiersweb/summarymodel.dart';
 
 import 'SummaryMonthRow.dart';
@@ -48,7 +49,15 @@ class _SummaryYearState extends State<SummaryYear> {
                       final month = summaryPumpUsage.months[index];
                       return SummaryMonthRow(
                         monthPumpUsage: month,
-                        onClick: (year) {},
+                        onClick: (year) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    SummaryMonth(title: 'Log',summaryMonthPumpUsage: month)),
+                          );
+
+                        },
                       );
                     },
                   ),
