@@ -24,7 +24,7 @@ class Schedules extends StatefulWidget {
 
 class _SchedulesState extends State<Schedules> {
   late Stream<ViewModel?>
-      _schedulesStream; // eigenlijk niet alleen schedules dus!
+      _schedulesStream; // deze kan weg!
   final uuid = Uuid();
 
 

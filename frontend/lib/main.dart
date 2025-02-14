@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tuinsproeiersweb/summary.dart';
 
 import 'firebase_options.dart';
 import 'model.dart';
@@ -275,6 +276,18 @@ class _MyHomePageState extends State<MyHomePage> {
                             );
                           },
                           child: Text('Open planning'),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            // Navigeren naar SecondPage
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      Summary(title: 'Log')),
+                            );
+                          },
+                          child: Text('Open log'),
                         ),
                       ],
                     ),
