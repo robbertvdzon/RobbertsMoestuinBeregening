@@ -1,14 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:uuid/uuid.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:html' as html;
 import 'package:json_annotation/json_annotation.dart';
-import 'dart:convert';
-import 'dart:async';
-import 'schedules.dart';
 
 part 'model.g.dart';
 
@@ -50,9 +40,9 @@ class ViewModel {
       return getReadableName(currentIrrigationArea);
     }
     if (currentIrrigationArea==IrrigationArea.MOESTUIN){
-      return getReadableName(IrrigationArea.GAZON)+" --> "+getReadableName(IrrigationArea.MOESTUIN);
+      return "${getReadableName(IrrigationArea.GAZON)} --> ${getReadableName(IrrigationArea.MOESTUIN)}";
     }
-    return getReadableName(IrrigationArea.MOESTUIN)+" --> "+getReadableName(IrrigationArea.GAZON);
+    return "${getReadableName(IrrigationArea.MOESTUIN)} --> ${getReadableName(IrrigationArea.GAZON)}";
 
   }
 

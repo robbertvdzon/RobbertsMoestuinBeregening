@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:tuinsproeiersweb/summarymodel.dart';
-import 'package:intl/intl.dart';
 
 class SummaryMonthRow extends StatefulWidget {
   final SummaryMonthsPumpUsage monthPumpUsage;
   final Function(int year) onClick;
 
   const SummaryMonthRow({
-    Key? key,
+    super.key,
     required this.monthPumpUsage,
     required this.onClick,
-  }) : super(key: key);
+  });
 
   @override
   _SummaryMonthRowState createState() => _SummaryMonthRowState();

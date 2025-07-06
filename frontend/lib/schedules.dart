@@ -41,9 +41,9 @@ class _SchedulesState extends State<Schedules> {
 
   void _addCommand(String data) async {
     setState(() {
-      final _db = FirebaseFirestore.instance;
+      final db = FirebaseFirestore.instance;
       final jsonKeyValue = <String, String>{"command": data};
-      _db
+      db
           .collection('bewatering')
           .doc('commands')
           .set(jsonKeyValue, SetOptions(merge: true))
@@ -62,7 +62,7 @@ class _SchedulesState extends State<Schedules> {
         title: const Text('Planning'),
       ),
       body: viewModel == null
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : Column(
         children: [
           // Knop toevoegen boven de lijst
@@ -128,7 +128,7 @@ class _SchedulesState extends State<Schedules> {
                         "ADD_SCHEDULE,${updatedSchedule.id},${updatedSchedule.duration},${updatedSchedule.daysInterval},${updatedSchedule.area.name},${updatedSchedule.enabled},${updatedSchedule.startDate.year},${updatedSchedule.startDate.month},${updatedSchedule.startDate.day},${updatedSchedule.endDate?.year ?? ''},${updatedSchedule.endDate?.month ?? ''},${updatedSchedule.endDate?.day ?? ''},${updatedSchedule.scheduledTime.hour},${updatedSchedule.scheduledTime.minute}");
                   },
                   onDelete: (id) {
-                    _addCommand("REMOVE_SCHEDULE,${id}");
+                    _addCommand("REMOVE_SCHEDULE,$id");
                   },
                 );
               },

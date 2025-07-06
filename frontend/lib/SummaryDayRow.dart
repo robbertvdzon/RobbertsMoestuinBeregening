@@ -5,9 +5,9 @@ class SummaryDayRow extends StatefulWidget {
   final SummaryDaysPumpUsage dayPumpUsage;
 
   const SummaryDayRow({
-    Key? key,
+    super.key,
     required this.dayPumpUsage,
-  }) : super(key: key);
+  });
 
   @override
   _SummaryDayRowState createState() => _SummaryDayRowState();

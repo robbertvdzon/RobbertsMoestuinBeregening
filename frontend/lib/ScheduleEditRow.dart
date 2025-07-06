@@ -8,11 +8,11 @@ class ScheduleEditRow extends StatefulWidget {
   final Function(String id) onDelete;
 
   const ScheduleEditRow({
-    Key? key,
+    super.key,
     required this.schedule,
     required this.onSave,
     required this.onDelete,
-  }) : super(key: key);
+  });
 
   @override
   _ScheduleEditRowState createState() => _ScheduleEditRowState();
@@ -204,7 +204,7 @@ class _ScheduleEditRowState extends State<ScheduleEditRow> {
               ],
             ),
             const SizedBox(height: 8),
-            Text('Volgende planning: ' + _nextRun),
+            Text('Volgende planning: $_nextRun'),
             const SizedBox(height: 8),
             // Derde rij: checkbox voor enabled.
             Row(

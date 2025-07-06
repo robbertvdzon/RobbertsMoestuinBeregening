@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:tuinsproeiersweb/summaryMonth.dart';
 import 'package:tuinsproeiersweb/summarymodel.dart';
 
 import 'SummaryMonthRow.dart';
-import 'SummaryYearRow.dart';
-import 'viewModelProvider.dart';
 
 class SummaryYear extends StatefulWidget {
   const SummaryYear({super.key, required this.title, required this.summaryYearPumpUsage});
@@ -38,7 +35,7 @@ class _SummaryYearState extends State<SummaryYear> {
         title: const Text('Log'),
       ),
       body: summaryPumpUsage == null
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
                 // De lijst met planningen

@@ -37,12 +37,14 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: AuthStateChecker(),
+      home: const AuthStateChecker(),
     );
   }
 }
 
 class AuthStateChecker extends StatelessWidget {
+  const AuthStateChecker({super.key});
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<User?>(
@@ -50,13 +52,13 @@ class AuthStateChecker extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           // Toon een laadscherm terwijl de status wordt gecontroleerd
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasData) {
           // Gebruiker is ingelogd, ga naar MyHomePage
-          return MyHomePage(title: 'Beregening Robbert\'s moestuin');
+          return const MyHomePage(title: 'Beregening Robbert\'s moestuin');
         } else {
           // Gebruiker is niet ingelogd, ga naar LoginPage
-          return LoginPage();
+          return const LoginPage();
         }
       },
     );
@@ -93,13 +95,13 @@ class _MyHomePageState extends State<MyHomePage> {
     }
     String disabledText = "";
     if (viewModelCopy?.valveStatus==ValveStatus.MOVING) disabledText = "(aan het wisselen)";
-    return timeLeft+" "+disabledText;
+    return "$timeLeft $disabledText";
   }
 
   @override
   void initState() {
     super.initState();
-    _timeStream = Stream.periodic(Duration(seconds: 1), (_) => "");
+    _timeStream = Stream.periodic(const Duration(seconds: 1), (_) => "");
     _requestBackendUpdates();
 
     // Luister naar veranderingen in tab-/venstervisibiliteit
@@ -121,9 +123,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _addCommand(String data) async {
     setState(() {
-      final _db = FirebaseFirestore.instance;
+      final db = FirebaseFirestore.instance;
       final jsonKeyValue = <String, String>{"command": data};
-      _db
+      db
           .collection('bewatering')
           .doc('commands')
           .set(jsonKeyValue, SetOptions(merge: true))
@@ -146,7 +148,7 @@ class _MyHomePageState extends State<MyHomePage> {
           height: double.infinity,
           // Vul de volledige hoogte
           alignment: Alignment.center,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             image: DecorationImage(
                 image: AssetImage('assets/beregening.png'),
                 // Jouw afbeeldingsbestand
@@ -158,12 +160,12 @@ class _MyHomePageState extends State<MyHomePage> {
             // mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Text('Laatste status update: ${beregeningData?.lastUpdate}'),
-              SizedBox(height: 270),
+              const SizedBox(height: 270),
 
 // Controller
               Container(
-                margin: EdgeInsets.all(10), // Marges rond het blok
-                padding: EdgeInsets.all(15), // Binnenruimte binnen het blok
+                margin: const EdgeInsets.all(10), // Marges rond het blok
+                padding: const EdgeInsets.all(15), // Binnenruimte binnen het blok
                 decoration: buildBoxDecoration(),
                 child: Column(
                   mainAxisSize: MainAxisSize.min, // Minimaliseer de hoogte
@@ -172,13 +174,13 @@ class _MyHomePageState extends State<MyHomePage> {
                       stream: _timeStream,
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) {
-                          return CircularProgressIndicator();
+                          return const CircularProgressIndicator();
                         }
                         return Text(
                             'Timer: ${getTimeLeft(beregeningData?.viewModel)}');
                       },
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       // Centreer de widgets horizontaal
@@ -190,28 +192,28 @@ class _MyHomePageState extends State<MyHomePage> {
                             ElevatedButton(
                               onPressed: () =>
                                   _addCommand("UPDATE_IRRIGATION_TIME,-30"),
-                              child: Text('-30'),
+                              child: const Text('-30'),
                             ),
-                            SizedBox(width: 10),
+                            const SizedBox(width: 10),
                             // Voeg een beetje ruimte tussen de widgets
                             ElevatedButton(
                               onPressed: () =>
                                   _addCommand("UPDATE_IRRIGATION_TIME,-5"),
-                              child: Text('-5'),
+                              child: const Text('-5'),
                             ),
-                            SizedBox(width: 10),
+                            const SizedBox(width: 10),
                             // Voeg een beetje ruimte tussen de widgets
                             ElevatedButton(
                               onPressed: () =>
                                   _addCommand("UPDATE_IRRIGATION_TIME,5"),
-                              child: Text('+5'),
+                              child: const Text('+5'),
                             ),
-                            SizedBox(width: 10),
+                            const SizedBox(width: 10),
                             // Voeg een beetje ruimte tussen de widgets
                             ElevatedButton(
                               onPressed: () =>
                                   _addCommand("UPDATE_IRRIGATION_TIME,30"),
-                              child: Text('+30'),
+                              child: const Text('+30'),
                             ),
                           ],
                         ),
@@ -224,25 +226,25 @@ class _MyHomePageState extends State<MyHomePage> {
               // AREA
 
               Container(
-                margin: EdgeInsets.all(10), // Marges rond het blok
-                padding: EdgeInsets.all(15), // Binnenruimte binnen het blok
+                margin: const EdgeInsets.all(10), // Marges rond het blok
+                padding: const EdgeInsets.all(15), // Binnenruimte binnen het blok
                 decoration: buildBoxDecoration(),
                 child: Column(
                   mainAxisSize: MainAxisSize.min, // Minimaliseer de hoogte
                   children: [
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     Text('Beregeningsgebied: ${beregeningData?.viewModel.valveState}'),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         ElevatedButton(
                           onPressed: () => _addCommand("CHANGE_AREA,GAZON"),
-                          child: Text('Gazon'),
+                          child: const Text('Gazon'),
                         ),
-                        SizedBox(width: 10), // Ruimte tussen de knoppen
+                        const SizedBox(width: 10), // Ruimte tussen de knoppen
                         ElevatedButton(
                           onPressed: () => _addCommand("CHANGE_AREA,MOESTUIN"),
-                          child: Text('Moestuin'),
+                          child: const Text('Moestuin'),
                         ),
                       ],
                     ),
@@ -252,15 +254,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
 // PLANNING
               Container(
-                margin: EdgeInsets.all(10), // Marges rond het blok
-                padding: EdgeInsets.all(15), // Binnenruimte binnen het blok
+                margin: const EdgeInsets.all(10), // Marges rond het blok
+                padding: const EdgeInsets.all(15), // Binnenruimte binnen het blok
                 decoration: buildBoxDecoration(),
                 child: Column(
                   mainAxisSize: MainAxisSize.min, // Minimaliseer de hoogte
                   children: [
                     Text(
                         'Volgende planning: ${beregeningData?.viewModel.nextSchedule}'),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       // Centreer de widgets horizontaal
@@ -272,10 +274,10 @@ class _MyHomePageState extends State<MyHomePage> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>
-                                      Schedules(title: 'Planning')),
+                                      const Schedules(title: 'Planning')),
                             );
                           },
-                          child: Text('Open planning'),
+                          child: const Text('Open planning'),
                         ),
                         ElevatedButton(
                           onPressed: () {
@@ -284,10 +286,10 @@ class _MyHomePageState extends State<MyHomePage> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>
-                                      Summary(title: 'Log')),
+                                      const Summary(title: 'Log')),
                             );
                           },
-                          child: Text('Open log'),
+                          child: const Text('Open log'),
                         ),
                       ],
                     ),
@@ -311,7 +313,7 @@ class _MyHomePageState extends State<MyHomePage> {
         BoxShadow(
           color: Colors.black.withOpacity(0.4), // Optionele schaduw
           blurRadius: 10,
-          offset: Offset(0, 5),
+          offset: const Offset(0, 5),
         ),
       ],
     );
@@ -345,6 +347,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
 //---------
 class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -366,7 +370,7 @@ class _LoginPageState extends State<LoginPage> {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
             builder: (context) =>
-                MyHomePage(title: 'Robbert' 's tuinsproeiers')),
+                const MyHomePage(title: 'Robbert' 's tuinsproeiers')),
       );
     } catch (e) {
       // Toon foutbericht
@@ -380,7 +384,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Login'),
+        title: const Text('Login'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -390,38 +394,38 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               TextField(
                 controller: _emailController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Gebruikersnaam',
                   border: OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.emailAddress,
-                autofillHints: [
+                autofillHints: const [
                   AutofillHints.username
                 ], // Autofill voor gebruikersnaam
               ),
-              SizedBox(height: 10), // Ruimte tussen velden
+              const SizedBox(height: 10), // Ruimte tussen velden
               TextField(
                 controller: _passwordController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Wachtwoord',
                   border: OutlineInputBorder(),
                 ),
                 obscureText: true, // Maakt tekst verborgen
-                autofillHints: [
+                autofillHints: const [
                   AutofillHints.password
                 ], // Autofill voor wachtwoord
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               ElevatedButton(
                 onPressed: _login,
-                child: Text('Login'),
+                child: const Text('Login'),
               ),
               if (_errorMessage.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(top: 10),
                   child: Text(
                     _errorMessage,
-                    style: TextStyle(color: Colors.red),
+                    style: const TextStyle(color: Colors.red),
                   ),
                 ),
             ],

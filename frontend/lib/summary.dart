@@ -36,7 +36,7 @@ class _SummaryState extends State<Summary> {
         title: const Text('Log'),
       ),
       body: summaryPumpUsage == null
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
                 // De lijst met planningen

@@ -6,10 +6,10 @@ class SummaryYearRow extends StatefulWidget {
   final Function() onClick;
 
   const SummaryYearRow({
-    Key? key,
+    super.key,
     required this.yearPumpUsage,
     required this.onClick,
-  }) : super(key: key);
+  });
 
   @override
   _SummaryYearRowState createState() => _SummaryYearRowState();
