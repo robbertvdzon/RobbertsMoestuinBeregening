@@ -14,6 +14,7 @@ import com.vdzon.irrigation.components.hardware.HardwareImpl
 import com.vdzon.irrigation.components.hardwaresimulation.HardwareSimulation
 import com.vdzon.irrigation.components.log.LogImpl
 import com.vdzon.irrigation.components.network.NetworkImpl
+import com.vdzon.irrigation.components.openai.OpenAiEngine
 import com.vdzon.irrigation.components.pumplog.PumpLogImpl
 
 object Main {
@@ -47,14 +48,24 @@ object Main {
         val pumpLog = PumpLogImpl(firebaseProducer, log, objectMapper, controller)
         val firebaseListener = FirebaseListener(COLLECTION, COMMANDS_DOCUMENT, commandProcessor, log)
 
-        firebaseListener.processCommands(dbFirestore)
-        hardware.registerSwitchListener(controller)
-        commandProcessor.registerListener(controller)
-        network.registerNetworkListener(controller)
-        hardware.start()
-        network.start()
-        controller.start()
-        pumpLog.start()
+        val openAI = OpenAiEngine()
+
+        val response = openAI.chat(
+            "Je bent een moestuin expert",
+            "Ik heb een bloemkool in de kas. Hier een foto. Kun je zien of de bloemkool al geoogst kan worden?",
+            listOf("https://firebasestorage.googleapis.com/v0/b/tuinbewatering.firebasestorage.app/o/IMG_418FA3B2-03E2-4361-8466-195F2EA55FA7.JPEG?alt=media&token=da7c4175-72e6-4000-9070-e2fc7f9334ba"),
+            "o4-mini")
+        println(response)
+
+
+//        firebaseListener.processCommands(dbFirestore)
+//        hardware.registerSwitchListener(controller)
+//        commandProcessor.registerListener(controller)
+//        network.registerNetworkListener(controller)
+//        hardware.start()
+//        network.start()
+//        controller.start()
+//        pumpLog.start()
     }
 
 

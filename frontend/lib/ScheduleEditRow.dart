@@ -170,7 +170,7 @@ class _ScheduleEditRowState extends State<ScheduleEditRow> {
                     controller: _durationController,
                     keyboardType: TextInputType.number,
                     decoration:
-                        const InputDecoration(labelText: 'Duur (minuten)'),
+                        const InputDecoration(labelText: 'Duur in minuten'),
                   ),
                 ),
               ],
@@ -198,7 +198,7 @@ class _ScheduleEditRowState extends State<ScheduleEditRow> {
                     controller: _intervalController,
                     keyboardType: TextInputType.number,
                     decoration:
-                    const InputDecoration(labelText: 'Interval (dagen)'),
+                    const InputDecoration(labelText: 'Interval in dagen'),
                   ),
                 ),
               ],

@@ -77,6 +77,26 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   late Stream<String> _timeStream;
 
+
+  void _pickImage() {
+    final uploadInput = html.FileUploadInputElement();
+    uploadInput.accept = 'image/*';
+    uploadInput.setAttribute('capture', 'environment');// Op mobiel opent dit direct de camera
+
+    uploadInput.click(); // Open de bestandskiezer/camera
+
+    uploadInput.onChange.listen((e) {
+      final files = uploadInput.files;
+      if (files != null && files.isNotEmpty) {
+        final file = files.first;
+        print('Gekozen bestand: ${file.name} (${file.size} bytes)');
+
+        // Hier kun je het bestand verwerken, previewen of uploaden
+      }
+    });
+  }
+
+
   String getTimeLeft(ViewModel? viewModel) {
     String timeLeft = "Unknown";
     final viewModelCopy = viewModel;
@@ -214,6 +234,10 @@ class _MyHomePageState extends State<MyHomePage> {
                               onPressed: () =>
                                   _addCommand("UPDATE_IRRIGATION_TIME,30"),
                               child: const Text('+30'),
+                            ),
+                            ElevatedButton(
+                              onPressed: _pickImage,
+                              child: const Text('📷 Maak foto'),
                             ),
                           ],
                         ),
